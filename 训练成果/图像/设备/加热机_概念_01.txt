@@ -1,9 +1,0 @@
-checkpoint: 角色动漫插画融合模型The WonderMix（Checkpoint大模型）网盘免费下载\theIWondermix_v7.safetensors
-prompt: low poly stylized milk tea shop steam machine, double head steam wand, stainless steel body, black slanted control panel with cyan screen, red knobs, drip tray, clean game asset, isometric 3/4 view, white background, soft studio lighting, no text
-negative: text, logo, watermark, blurry, low quality, extra objects, people, cluttered background
-size: 1024x1024
-steps: 25
-cfg: 7.0
-seed: 674402238
-sampler: euler / normal
-comfyui: http://127.0.0.1:8188
