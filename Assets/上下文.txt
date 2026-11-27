@@ -292,3 +292,12 @@
 ㊺ 2026-11-09 · 通用物件等级 MachineLevel + 冰格等级解锁：新增 MachineLevel.cs（level/maxLevel/machineId/Upgrade()/Get(id)，
    PlayerPrefs 存「MachineLevel_{id}」，AutoAttach 前制作台/前台，ContextMenu 可测试升级）；IceTray 加 unlockSource/unlockLevel(2)/IsUnlocked
    （惰性查找避开 Awake 顺序坑）；CupInteract 冰格按钮显隐加 IsUnlocked 判定 → 1 级无冰格按钮、2 级开放取冰。40 个 .cs csc EXIT=0。
+
+㊻ 2026-11-27 · 工程流水线落地：① git 初始化并推 GitHub（user-yechen/MilkTeaShopSimulator，main + tag v0.0.1-slice；
+   .gitignore 排除 Library/Temp/obj/Logs/UserSettings，.gitattributes 统一 LF + UnityYAMLMerge，LFS 跟踪 glb/fbx/blend 共 21 个）；
+   ② **主场景加入 Build Settings**（此前 m_Scenes 为空，无法出包）；③ PlayerSettings 正式化：companyName yechen、
+   Android/Standalone 包名 com.yechen.milktea、bundleVersion 0.1.0（旧包名 com.yourcompany.yourproduct 是占位，需卸载旧包）；
+   ④ 新增 Editor/BuildScript.cs 一键出包：菜单「奶茶店/构建/Android APK」或命令行
+   `Unity.exe -batchmode -quit -projectPath <路径> -buildTarget Android -executeMethod BuildScript.BuildAndroid -logFile Build/build.log`，
+   产物 Build/Android/milktea_{版本}_{时间}.apk；已实测 Build Finished Success（arm64+armv7 / minSdk22 / targetSdk35 / debug 签名）。
+   **注意**：换包名后存档目录从 LocalLow\123\ 变为 LocalLow\yechen\，旧存档不自动迁移。

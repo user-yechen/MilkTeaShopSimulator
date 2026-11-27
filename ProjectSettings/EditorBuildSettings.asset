@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/奶茶店.unity
+    guid: c339498f7df8c5646920479e17cb7107
   m_configObjects: {}
