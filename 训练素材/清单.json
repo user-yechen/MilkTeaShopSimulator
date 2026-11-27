@@ -12,9 +12,66 @@
       "items": []
     },
     "图像": {
-      "count": 0,
-      "total_mb": 0.0,
-      "items": []
+      "count": 7,
+      "total_mb": 0.4,
+      "items": [
+        {
+          "name": "写实/参考_蒸汽机_01.png",
+          "ext": ".png",
+          "size_kb": 70.6,
+          "md5": "b416d735d27551142a376abe33115968",
+          "width": 800,
+          "height": 800
+        },
+        {
+          "name": "写实/参考_蒸汽机_02.jpg",
+          "ext": ".jpg",
+          "size_kb": 81.8,
+          "md5": "8ad5c96e1301e63b72fab342d74ed9f9",
+          "width": 750,
+          "height": 750
+        },
+        {
+          "name": "写实/参考_蒸汽机_03.jpg",
+          "ext": ".jpg",
+          "size_kb": 45.8,
+          "md5": "4c7b6fff67b969f087e8bb051392bdd5",
+          "width": 800,
+          "height": 800
+        },
+        {
+          "name": "写实/参考_蒸汽机_04.jpg",
+          "ext": ".jpg",
+          "size_kb": 27.2,
+          "md5": "bce046d952403808f74d0c33a19b7dd5",
+          "width": 310,
+          "height": 310
+        },
+        {
+          "name": "写实/参考_蒸汽机_05.jpg",
+          "ext": ".jpg",
+          "size_kb": 60.7,
+          "md5": "db59db6fbf9f101f96673efa8d831e4a",
+          "width": 310,
+          "height": 310
+        },
+        {
+          "name": "写实/参考_蒸汽机_06.jpg",
+          "ext": ".jpg",
+          "size_kb": 77.6,
+          "md5": "6d04d7b80e9f4d4397b263b1988f9c1e",
+          "width": 310,
+          "height": 310
+        },
+        {
+          "name": "写实/参考_蒸汽机_07.jpg",
+          "ext": ".jpg",
+          "size_kb": 41.5,
+          "md5": "6e7be61122a60019d3bf10dd26cb1128",
+          "width": 310,
+          "height": 310
+        }
+      ]
     }
   },
   "duplicates": []

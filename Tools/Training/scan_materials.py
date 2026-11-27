@@ -59,31 +59,33 @@ def main():
         folder = os.path.join(TRAIN, cat)
         items = []
         if os.path.isdir(folder):
-            for name in sorted(os.listdir(folder)):
-                path = os.path.join(folder, name)
-                if not os.path.isfile(path) or name in SKIP:
-                    continue
-                ext = os.path.splitext(name)[1].lower()
-                info = {
-                    "name": name,
-                    "ext": ext,
-                    "size_kb": round(os.path.getsize(path) / 1024, 1),
-                    "md5": md5(path),
-                }
-                if ext in IMAGE_EXT:
-                    size = image_size(path)
-                    if size:
-                        info["width"], info["height"] = size
-                elif ext == ".wav":
-                    dur = wav_duration(path)
-                    if dur:
-                        info["duration_sec"] = dur
-                items.append(info)
+            for root, dirs, files in os.walk(folder):
+                for name in sorted(files):
+                    path = os.path.join(root, name)
+                    if name in SKIP:
+                        continue
+                    rel = os.path.relpath(path, folder).replace("\\", "/")
+                    ext = os.path.splitext(name)[1].lower()
+                    info = {
+                        "name": rel,
+                        "ext": ext,
+                        "size_kb": round(os.path.getsize(path) / 1024, 1),
+                        "md5": md5(path),
+                    }
+                    if ext in IMAGE_EXT:
+                        size = image_size(path)
+                        if size:
+                            info["width"], info["height"] = size
+                    elif ext == ".wav":
+                        dur = wav_duration(path)
+                        if dur:
+                            info["duration_sec"] = dur
+                    items.append(info)
 
-                if info["md5"] in seen:
-                    result["duplicates"].append([seen[info["md5"]], cat + "/" + name])
-                else:
-                    seen[info["md5"]] = cat + "/" + name
+                    if info["md5"] in seen:
+                        result["duplicates"].append([seen[info["md5"]], cat + "/" + rel])
+                    else:
+                        seen[info["md5"]] = cat + "/" + rel
 
         result["categories"][cat] = {
             "count": len(items),
