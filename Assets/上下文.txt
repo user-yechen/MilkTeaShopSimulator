@@ -1,0 +1,294 @@
+================================================================
+  奶茶店项目 —— 上下文持久化文件
+  约定：每次新对话先读本文件，功能完成后覆盖更新本文件
+================================================================
+
+【项目元信息】
+- Unity 2022.3.56f1c1，Windows，PowerShell5；项目路径 d:\UnityProject\奶茶店（注意：实际盘符目录名是 milktea）
+- 主场景：Assets/Scenes/奶茶店.unity（YAML 文本，中文以 \uXXXX 存储）
+- 编译验证：netcorerun=D:\unity\2022.3.56f1c1\Editor\Data\Tools\netcorerun\netcorerun.exe；csc=…\Editor\Data\DotNetSdkRoslyn\csc.dll
+- **全部脚本一起编译的验证组合（2026-11-09 实测 EXIT=0）**：
+  NetStandard\ref\2.1.0\netstandard.dll + Managed\UnityEngine\UnityEngine.*Module.dll（全）
+  + Managed\UnityEngine\UnityEditor.CoreModule.dll + UnityEditor.SceneViewModule.dll + Library\ScriptAssemblies\UnityEngine.UI.dll
+  （三个 facade 都不能引：Managed\UnityEngine.dll、Managed\UnityEditor.dll、Managed\UnityEngine\UnityEditor.dll——前两者类型绑到 facade 程序集名与模块冲突 CS0012/CS0030，第三者与 CoreModule 重复定义 MenuItem）
+- CS0436 警告是"引用旧 Assembly-CSharp.dll 再编同名 .cs"的验证副作用，Unity 自身编译无此问题
+
+================================================================
+【脚本功能索引 —— 运行时（Assets/脚本/，共 29 个）】
+================================================================
+
+① PasserbyWalk.cs —— 路人 AI。状态机 WalkingIn→Ordering→WalkingOut→Finished 循环。
+   进店条件 CustomersAllowed = ShopManager.IsOpen(8:00-16:00) && GameClock.IsAtOrAfter(firstHour=9, firstMinute=0)。
+   入口 x∈[-19.5,-17.3] z=4.5；点餐位 (-12,*,-16)；X 不超 -11.7。地面检测 RaycastNonAlloc 单射线（滤自身+normal.y≥0.5+取最高点，缓冲 RaycastHit[8]）。
+   RestartDay() 清零；RuntimeInitializeOnLoadMethod 自动挂名字含"路人"的物体。
+
+② ShopManager.cs —— 营业/营收/结束面板。8:00→16:00；CompleteOrder += 10+Random.Range(1,5)；16:00 弹结束面板。
+   营收/钱包 UI（2026-11-08）：Canvas 下「营收额」(150×20, x=-175,y=-10)→子「金额」(数值 Text)+「今日营收：」标签；
+   「钱包」(150×20, x=-75,y=10)→子「金额」(130×20)+「金币」图标。**两面板数值 Text 同名「金额」→ 必须按面板子树限定查找 FindStatText(panelName, "金额")**。
+   字段 revenuePanelName/walletPanelName/valueTextName="金额"、revenueFormat="{0} 元"、walletFormat="{0}"；找不到只 Warning；每帧比较 shown 值没变不写。
+   打烊：EndDay() 里 clock.enabled=false 后 AddToWallet(Revenue)；结束面板「今日营收：X 元 / 钱包：Y 元」。
+   RestartDay()：Revenue 清零 → GameClock.NextDay(8,0) → 清前台 → PasserbyWalk.RestartDay()。自动挂 Canvas。
+
+③ GameClock.cs —— 时钟（现实 1s=游戏 1min）+ 存档 + 天数 UI + 钱包。开局 8:00，按名字查时/分/秒针，自动挂 Canvas。
+   public int Day（默认1）/ int Wallet（2026-11-08 加，随 Day 存 JSON）；Start() 调 GameTimeStore.Load() 恢复（钟点不在营业时段→回当天 8:00）→ EnsureDayLabel()。
+   AddToWallet(amount) 立即 SaveTime。天数 UI：找「日期牌」→ GetComponentInChildren<Text>(true) 只改文字（"第 {0} 天"），不新建物体。
+   日期牌动画：controller 参数 bool Open；ShowDayBoard()= 置 true → 等 dayBoardOpenSeconds(3s) → 置 false；触发点 Start() 和 NextDay()；协程可重入。
+   Update 每 5s SaveTime；暂停/退出/销毁也存。NextDay(h,m)：Day++→SetTime→UpdateDayLabel→ShowDayBoard→SaveTime。
+
+④ CounterCupDisplay.cs —— 前台成品展示。台面「台面」子物体位置自前到后自左向右排列，cupSpacing=0.5m。
+   API：CupCount / TakeOneCup / TryPlaceCup(Cup)（先备份液体 localPosition/localScale 实例化后还原）/ IsNear(pos,dist)。
+
+⑤ CupInteract.cs —— 玩家交互协调器（挂主摄像机，已瘦身）。只管：杯架取杯、近距离判定+弹按钮、按钮转发设备组件。
+   仅 2 个设备引用（TeaMachine teaMachine / HeaterMachine heaterMachine）；可见性用 HasSlot/HasTea/HasFreeSlot 等。
+   奶茶机流程（2026-11-09 细分）：按钮「放入奶茶杯」OnInject=PlaceCup 只放杯**不再自动开面板**；机器里有杯（teaMachine.CurrentCup!=null）且靠近→出「选择液体」按钮→点击 ShowMachinePanel()（场景按名字含「奶茶机交互界面」找，没有才 Instantiate machinePanelPrefab 到 Canvas；
+   打开前把面板内 FluidCellButton.machine 补指向 teaMachine；关闭由面板自带 PanelCloseButton）。machinePanelPrefab 需手动拖预制体。
+   冰格按钮（2026-11-08）：场景已有「打开冰格/关闭冰格/取冰按钮」，EnsureUI 按名字接管（FindObjectsOfType<Button>(true)）后统一 SetParent 进滚动视图 content，
+   176 宽 + LayoutElement（高按贴图 2200:299≈24）、Text 字号 28→12 居中；找不到才自动创建。场景按钮原 IceTray 持久调用 CallState=0 禁用，实际点击走 AddListener。
+   FindContainers 找「奶茶杯架」+「中奶茶杯」/「大奶茶杯」模板。heldCupEuler=(180,0,0)（杯架网格 Y 翻转，旋转后杯底朝下）。
+   **顺序坑**：PickUpFromRack 先 AddComponent<Cup>()（立刻 Awake）再赋 cupType → Cup 不能依赖 Awake 里的 cupType。
+   按钮贴图：public Sprite buttonSprite 需手动拖 Assets/贴图/交互按钮.png（Sprite/Single/无border，GUID 82f777c9…）到 Main Camera；AddButtonToScroll 统一 sprite+白 tint。
+   取杯按钮动态文字（2026-11-08）：Update 按 slotCup/FindHeatedCup 的 teaType 拼「取走{杯型}{液体类型}」「取走热…」（Cup.CupTypeName + SetButtonLabel）。
+   性能：Renderer[] 只取一次；CanvasGroup 列表替代 Button 查询；GetWorldCorners 复用 Vector3[4]。
+   对外静态工具：ToLocalScale（项目唯一版本，其他脚本统一调它）。
+
+⑥ TeaMachine.cs —— 奶茶机设备组件。AutoAttach 按子节点特征反查（有子节点「杯位」的 **直接** 子节点特征，排除有杯位左/右的加热机）。自查 slot=杯位/nozzle=出料口/隐藏自带模板杯。
+    **2026-11-09：场景已无「出料口」节点（换模型时丢失）→ nozzle==null 时在杯位正上方 0.5m 自动建「出料口(自动)」保住出液动画；想精确控位置就手动建一个名为「出料口」的子物体**。
+   PlaceCup 只摆杯+记 handScale（不再自动注液）；注液走交互界面格子 → PourColored(color,label,tintCup,forceOpaque)：
+   有出料口 → PourFluid.Spawn(nozzle,color,forceOpaque) + 有杯则 SetLiquidColor+AnimateFill(0.70)+写 teaType；无出料口只染杯+SetFillLevel(0.70)。
+   forceOpaque=true → Shader _ForceOpaque=1 强制不透明（牛奶/椰果）。
+   API：IsNear(playerPos,dist)（Renderer[] 缓存算 bounds，放/取杯置空重取）/ HasSlot / HasTea(CupType) / PlaceCup(Cup)→原 worldScale / TakeCup(CupType)→(cup,handScale)。
+
+⑦ HeaterMachine.cs —— 加热机设备组件。AutoAttach 反查同时有「杯位左」+「杯位右」**直接子节点**的 Transform（2026-11-09 修，见经验 23）。
+   leftSlot/rightSlot + leftCup/rightCup + 各自 handScale。API：IsNear / HasFreeSlot / FindHeatedCup(CupType) / PlaceCup（优先空位+SetTemperature(Hot)，localRotation=Euler(180,0,0)）/ TakeCup。
+
+⑧ PourFluid.cs —— 注液流体动画（内置 ParticleSystem）。Spawn(nozzle, color?, forceOpaque)：先 sharedMaterial=奶茶液 再取实例染 _Color；forceOpaque → startColor alpha=1。
+   Shape=Cone angle=0 + shape.rotation.x=+90°（-90° 会朝上喷泉）；gravityModifier=-2.5；startSpeed=0 纯重力；240/s；1.2s 销毁；默认奶茶棕 (0.65,0.45,0.25,0.8)。
+   材质 Resources.Load("材料/奶茶液")（.mat 在 Assets/Resources/材料/，GUID 保留）；拿不到材质不赋值（防洋红）。
+
+⑨ Cup.cs —— 杯子组件（运行时才 AddComponent，预制体上没有）。CupType{Medium,Large} / Temperature{RoomTemp,LessIce,NoIce,NormalIce,Hot}；
+   isContained/teaType/Fill/Empty/SetTemperature/AnimateFill/SetFillLevel；SetLiquidColor(color, forceOpaque)（取材质实例改 _Color，forceOpaque 写 _ForceOpaque=1）；
+   defaultLiquidColor Inspector 字段替代硬编码奶茶棕；static CupTypeName(CupType)。
+   液体：运行时建/找子物体「液体」（MeshFilter+MeshRenderer，Shader=Resources/Shaders/MilkTeaLiquid，默认色 0.65,0.45,0.25），杯身材质永不触碰。
+   MilkTeaLiquid.shader（2026-11-08 改透明）：Transparent 队列 + Blend SrcAlpha OneMinusSrcAlpha + ZWrite Off + alpha:fade；[Toggle] _ForceOpaque 时 o.Alpha=1。
+   InitBounds()：遍历子 MeshFilter（跳过「液体」）用**网格本地包围盒 8 角点**换算杯本地空间求 cupMinY（不能 Renderer.bounds——X 旋转 180° 会取到杯口）。
+   ApplyFillLevel()：先按当前 cupType SetLiquidBaseParams() → height=maxHeight×fillLevel，topR=bottomR+slope×height → BuildFrustumMesh(baseY=0) → localPosition=(0,liquidLocalY,0)。
+   参数（用户手动微调反算，已 Play 确认）：大杯 底r=0.0950 斜率=0.085208 满高=0.70602 liquidLocalY=-0.25（绝对值写死）；
+   中杯 底r=0.07215 斜率=0.229354 满高=0.46215 liquidLocalY=cupMinY。公式：height=满高×fill；topR=底r+斜率×height。
+   实测：大杯网格(guid 8e40283a) bounds y∈[-0.4272,0.3607] 高 0.7879，运行时 cupMinY≈-0.0665（=网格 min+maxY）；中杯(guid c25de16e) y∈[-0.2463,0.2157] 高 0.4621。
+   **两张烘焙网格均 Y 镜像（杯口在 local -Y）** → 手持/上机统一 X 旋转 180° 翻正。
+
+⑩ PlayerController.cs —— 第一人称（主摄像机+CharacterController），摇杆驱动 XZ，Y 固定 2m，初始 (-17.5,2,0)。
+⑪ VirtualJoystick.cs —— 左侧虚拟摇杆：IPointerDown/Drag/Up + WASD，输出归一化 Vector2。
+    **位置自定义（2026-11-09）**：static bool positionEditMode（JoystickPositionAdjuster 开启）下拖动=移动整个摇杆
+    （background.anchoredPosition += eventData.delta / canvas.scaleFactor），不输出方向、不响应键盘、松手不回把手；
+    Awake 捕获 defaultAnchoredPos + 缓存 parentCanvas，Start 读 PlayerPrefs(JoystickPosX/Y) 恢复位置；
+    public SavePosition()（写 PlayerPrefs）/ ResetPosition()（删键 + 回默认）。
+㉖ JoystickPositionAdjuster.cs —— **摇杆位置调整模式（2026-11-09 新增，static 类）**。Begin(settingsPanel)：
+    FindObjectOfType<VirtualJoystick>(true) → positionEditMode=true + 设置面板隐藏 + 运行时建调整 UI
+    （全屏根无 Graphic 不挡射线；顶部提示 Text 带 Outline；底部居中「确定位置」(绿→SavePosition+退出) /「重置默认」(灰→ResetPosition)）；
+    字体 LegacyRuntime.ttf；Confirm/Exit 销毁 UI 并复位模式；重入直接 return。入口=设置界面「自定义摇杆位置」按钮。
+⑫ TouchLook.cs —— 摇杆区外滑动转视角，pitch∈[-60°,60°]。
+⑬ CupStack.cs —— 杯架堆叠 [ExecuteAlways]：优先 Inspector 拖的 Cup 预制件，没有回退第 0 个子对象；layers=5 沿 +Y spacing=0.05；克隆 Destroy 子物体「液体」。
+    当前杯架预制体 Cup 字段为空 → 运行时模板=容器第 0 个子对象。
+⑲ GameTimeStore.cs —— JSON 存档 static 类。GameTimeData{int day=1; int wallet=0}；路径 persistentDataPath/gameTime.json；
+    Load() 无文件→day1/wallet0，day<1 修正；Save(day,wallet) JsonUtility 覆盖写，异常只 Warning。唯一调用方 GameClock。
+    **2026-11-09 扩展**：GameTimeData 加 machineLevels(List<MachineLevelEntry{id,level})；带内存缓存；DefaultMachineIds 预写入默认 1 级
+    （前制作台/奶茶机/加热机/制冰机/货架/奶茶杯架/前台）；GetMachineLevel(id)/SetMachineLevel(id,lv)（经 GameClock.SaveTime 落盘）。
+    GameClock 加 TrySpend(amount)（购买扣款，余额不足返回 false 不动钱包）。
+㉒ ComingSoonTip.cs —— 左上角图标入口。场景「左上角UI」三个子图标「地图」「设置」「商店」（商店 2026-11-09 新加，需 Ctrl+S 落盘）。
+    AutoAttach(AfterSceneLoad) 挂「左上角UI」；Awake 找「提示框」（兜底关键词 提示/未开放/Toast/Tip）取子 Text 并 SetActive(false)；
+    绑定直接子物体：含「设置」→ OpenSettingsPanel（Resources.Load("预制件/设置界面") 实例化到 Canvas，已存在则激活；
+    首开时 **EnsureSettingsButtons**：含「关闭」补 PanelCloseButton、含「摇杆」→ JoystickPositionAdjuster.Begin(settingsPanel)，「退出游戏」暂不接管）；
+    含「商店」→ **OpenShopPanel**（2026-11-09）：场景先按名找「商店界面」（含未激活），没有则 Resources.Load("预制件/商店界面") 实例化到 Canvas；
+    首次打开时 EnsureShopCloseButton 给面板内名字含「关闭」的 Button 补 PanelCloseButton（幂等）；其余图标 → ShowTip（"功能未开放" 3s，可重入）。
+    字段：shopPrefabPath="预制件/商店界面"、shopIconKeyword="商店"、shopPanelInstance 缓存。
+    PanelCloseButton 的 windowRoot 自动查找关键词已从「交互界面」放宽为「界面」（商店界面/奶茶机交互界面通用）。
+㉕ ModelMeasurer.cs —— 模型尺寸测量 static 类（2026-11-09，供模型升级功能用）。ModelSizeInfo{worldSize/worldCenter（AABB，旋转会膨胀）、
+    localSize/localCenter（网格角点换算 root 本地空间，**占位判断用这个**）、Height/FootprintX/FootprintZ、rendererCount}；
+    Measure(go,out info,includeInactive=true) / LogMeasure(go)。无 MeshFilter 退化用世界 AABB 反算；无 Renderer 打 Warning 返回 false。
+㉗ ModelScaler.cs —— **升级防穿模缩放（2026-11-09 新增，static 类）**。FitMode{UniformFitInside=三轴最小商等比收进目标盒(默认)、
+    UniformByFootprint=按 XZ 占地等比贴合、ExactNonUniform=三轴各自精确}；FitResult{targetSize/appliedScale/finalSize}。
+    TryGetWorldSize(obj)=localSize×lossyScale（仅无旋转成立）；FitTo(obj,targetSize,mode) 算 localScale 并写入（计入父链 lossyScale，可嵌套）；
+    **UpgradeReplace(oldObj,newPrefab,mode)=整棵预制件替换【升级换模型采用此方案，2026-11-09 定】**：量旧尺寸→原位/旋转/父节点实例化新预制件→
+    FitTo 防穿模→Destroy 旧。注意 static 类里必须 Object.Instantiate；整棵替换要求新预制件自带完整组件（IceTray/MachineLevel/Animator/碰撞箱）。
+㉘ MachineLevel.cs —— **通用物件等级（2026-11-09 新增，商店升级的数值基础）**。字段 machineId(空=取物体名)/level(默认1)/maxLevel(5)；
+    事件 OnLevelChanged；IsAtLeast(lv)/SetLevel/Upgrade()；静态注册表 MachineLevel.Get(id)；
+    **等级存 gameTime.json（GameTimeStore.Get/SetMachineLevel，2026-11-09 从 PlayerPrefs 迁来，与时间/钱包同档）**；ContextMenu「升 1 级（测试）」。
+    AutoAttach 用 **CanonicalIdFor(t)** 定规范 ID：直接子节点特征（杯位→奶茶机，杯位左+右→加热机）+ 名字含 前制作台/制冰机/奶茶杯架/货架/前台；
+    排除 RectTransform 和名含「界面/按钮」者（防误挂 奶茶机交互界面）。
+    **首个接线**：IceTray 加 unlockSource+unlockLevel(=2)+IsUnlocked（惰性 GetComponentInParent，因 AfterSceneLoad 晚于场景 Awake），
+    CupInteract 冰格按钮显隐 nearIce 加 && iceTray.IsUnlocked，OnClickOpen 也加守卫 → **前制作台 1 级无冰格按钮，2 级开放取冰**。
+㉙ ShopItem.cs —— **商店物品（2026-11-09，挂「物品容器」预制件）**。字段 itemId/displayName/itemLevel(默认1)/price + priceText(自动找名含
+    金额/价格/Price) + ownedMark(名含 已拥有)；IsOwned=GameTimeStore.GetMachineLevel(itemId)≥itemLevel；OnEnable 刷新进静态 all 列表。
+    点击：已拥有→弹提示；余额不足→弹提示；否则 ShopPurchaseDialog.ShowConfirm → Purchase()=GameClock.TrySpend + MachineLevel.SetLevel
+    （场景无该物件则只写存档）→ RefreshAll()。**每个物品容器需在 Inspector 填 itemId/itemLevel/price**。
+㉚ ShopPurchaseDialog.cs —— 购买确认弹窗（运行时创建模态：半透明遮罩+面板+文字+按钮，LegacyRuntime 字体，SetAsLastSibling 盖顶层）。
+    ShowConfirm(name,price,onConfirm)（确认购买/取消）；ShowMessage(msg)（知道了）。
+㉛ ShopPriceTable.cs —— **价格表读取（2026-11-09）**。[RuntimeInitializeOnLoadMethod(BeforeSceneLoad)] 每次运行读一次
+    **Assets/Resources/价格表.txt**（必须在 Resources 下否则打包读不到）；格式「物件ID,等级,价格」# 注释，等级可省，中英文逗号均可。
+    GetPrice(id,level,fallback)/Has(id,level)；ShopItem.EffectivePrice 优先查表，查不到用 Inspector price。改表不用重编译。
+㉜ ShelfLayout.cs —— **货架格子布局（3D 版 LayoutGroup，2026-11-09，挂货架「存放物品」子对象）**。[ExecuteAlways] 编辑器拖入即时重排。
+    OnTransformChildrenChanged 触发 Relayout()：按 ModelMeasurer 量的本地尺寸在 XZ 网格排列（X 行内排、超 maxRowWidth 或 itemsPerRow 换行沿 Z），
+    包围盒 min 角对齐光标 → 底面贴 y=0 不悬空。参数 spacingX/spacingZ/maxRowWidth(0=不限)/itemsPerRow(0=不限)/rowDirectionZ(-1 由后往前)。
+㉝ ShelfZone.cs —— **置物区识别标识（2026-11-09，和 ShelfLayout 同挂存放子对象）**。字段 identifier(留空用物体名)/itemPrefab(留空克隆首个子物体)；
+    SpawnItem() 实例化一份；IsNear 用 Renderer bounds 最近点距离（同 TeaMachine 算法）。
+㉞ ShelfInteract.cs —— **货架取物交互（自动挂主摄像机）**。靠近置物区(interactDistance=3m)屏幕下方弹「获取{identifier}」按钮（竖排 56px 间隔，
+    列表不变不重建防吞点击）；点击 TakeItem→SpawnItem 挂相机 holdOffset(0.35,-0.25,0.6)，**手持缩放 = 世界尺寸×holdScaleFactor(0.4，同奶茶杯，2026-11-09)**。static HeldItem/ClearHeldItem()；手上已有货架物品不出按钮。
+    置物区列表 2 秒重扫一次（新货架后加也能认）。
+㉟ FluidProvider.cs —— **流体供给物（挂牛奶等预制件）**。只存 fluidName（须与 FluidCellButton.fluidName 一致）+ mlPerUnit（牛奶=1000）；奶茶机只读不存。
+㊱ MachineRefillInteract.cs —— **奶茶机补液交互（自动挂主摄像机）**。手持带 FluidProvider 的物品 + 靠近(interactDistance=3) + 机内该流体 HasSpace
+    → 屏幕下方(y=60)弹「注入{fluidName}」；点击 AddFluid（超上限截断不返还）→ Destroy 手上物品 + ShelfInteract.ClearHeldItem()
+    → ComingSoonTip.Show("流体名 剩余ml/上限ml(+注入量)")。**TeaMachine 容量系统**：FluidTank{fluidName,ml,maxMl} 列表，tankCapacityMl=20000，
+    首触自动建**空**罐（2026-11-09 改：必须先注入才能出液）；PourColored 注杯前 TryConsume（大500/中300）不足→提示「不足」中止；HasSpace 满罐→不出注入按钮。**每日清空**：GameClock 加 static event OnNewDay（NextDay 触发），TeaMachine OnEnable 订阅→ClearAllFluids()。
+㊲ OrderBubble.cs —— **路人点单对话框**（AutoAttach 到「路人」，气泡=子 SpriteRenderer 名字含 对话/气泡）。
+    槽位固定序 杯型→液体→温度→配料→盖料，当前只实现 杯型(中/大随机→CupType)+液体(牛奶→FluidName)，温度/配料/盖料待加。
+    **显示时机（2026-11-09）：走路时气泡+图标全隐藏；订阅 PasserbyWalk.OnArrivedAtCounter → 到前台停下才显气泡，图标逐个展示（每个停留 iconInterval=1s 后消失再显示下一个），播完后整份订单图标一起保持显示；OnLeft → 全隐藏。Update 保险：walker 不 IsOrdering（PasserbyWalk 新增 public IsOrdering）就强制 Hide，不依赖事件时机**。
+    **取餐匹配（2026-11-09）：PasserbyWalk 只取符合订单的饮品**——CounterCupDisplay 新增 HasCup/TakeCup(CupType, teaType)（杯型=OrderBubble.CupType 转枚举，液体=FluidName 对 Cup.teaType），不匹配不取、继续等；没挂 OrderBubble 时退化为旧的"任意一杯"。
+    图标 Resources.Load&lt;Sprite&gt;("贴图/{名}")：**中奶茶杯/大奶茶杯/牛奶/茶 4 图已移到 Assets/Resources/贴图/**（GUID 不变）；
+    图标=气泡子物体「订单图标」下水平居中排列，统一世界高 iconHeight(0.44m=0.22×2，已除父链缩放)，sortingOrder=气泡+1。
+㊲ ComingSoonTip 加 **static Show(text,seconds=3)** 通用文字提示（复用场景提示框，instance 由 OnEnable 登记）。
+㊴ **交互按钮统一进滚动视图（2026-11-09）**：CupInteract 加 `static Instance`（Awake 登记）+ `AddSharedButton(label)`（在 buttonContent 建同款按钮：CreateButton+AddButtonToScroll 统一 12 号字/LayoutElement/贴图）。
+    ShelfInteract 的「获取{标识}」、MachineRefillInteract 的「注入{流体}」**只走该共享容器（2026-11-09 已删各自屏幕下方自建按钮的兜底，Instance 为空就本帧跳过）——后续所有玩家与物件的交互按钮一律 AddSharedButton**。
+㊳ **预制件接线（2026-11-09 编辑器关闭时直接改 YAML）**：牛奶.prefab（PrefabInstance 变体）m_AddedComponents 挂 FluidProvider（stripped GO 8614192628895759692，fluidName=牛奶 mlPerUnit=1000）；
+    货架.prefab「置物区」(GO 6982655991896145911，原已有 ShelfLayout) 挂 ShelfZone(&8244555579464062308，identifier=牛奶，itemPrefab **留空**)。
+    ⚠ 教训24：**预制件变体不能手填 100100000 当根 GameObject 引用**（解析成 PrefabInstance，Instantiate 抛 InvalidCastException）；置物区取物走"克隆首个子物体"兜底，要在 Inspector 拖引用需用编辑器。
+
+================================================================
+【脚本功能索引 —— Editor（Assets/Editor/，共 15 个）】
+================================================================
+
+**「奶茶店」菜单结构（2026-11-09 归纳整理，priority 控制顺序/分隔线）**：
+  场景搭建/(1-7)：创建地板·半地板(10×5)·半地板(5×10)·墙壁·半长墙(5×6)·墙体高度加倍·天花板加光源
+  杯子/(20-24)：测量选中杯子尺寸·将当前大小设为原生大小(应用缩放)·选中物体：Pivot移到底边中心·液位/给选中物体加液体·液位/给所有奶茶杯加液体
+  材质/(40-42)：创建奶茶液材质并赋值·修复杯子Prefab材质(极简版)·配置杯子裁剪Shader
+  预制件/(60-63)：保存选中 %#s·应用选中实例 %#a·恢复选中实例·用预制件替换选中（另各有 CONTEXT/GameObject 右键入口）
+  交互界面/(80-81)：给流体格子加点击脚本·给选中容器加垂直滚动视图
+  工具/(100-104)：调整时间到9:00·设为横屏(Android)·运行时Scene跟随摄像机(可勾选)·测量选中模型尺寸·批量测量场景物件尺寸
+
+- SceneSetupTool.cs：场景搭建 6 项。地板/墙 CreatePrimitive(Cube)+EnsureMaterial（地板_米黄/墙壁_白）；墙体高度加倍=遍历名字「墙壁」「半长墙」开头者 scaleY×2 保底边。
+- CeilingLightTool.cs：场景搭建/天花板加光源。FindCeilingRoot()=遍历同名「天花板」取子 Renderer 最多者（根与 7 块顶板同名！）；
+  每顶板下加 Point Light(1.2/range12/无阴影)，位置用**世界坐标** bounds.center-up×(extents.y+0.25)（local 会被 0.1 缩放压扁）；
+  首跑复制 地板_米黄.mat→天花板_发光.mat（_EMISSION 暖白×0.4）换顶板 sharedMaterial；可重复执行，需 Ctrl+S。
+- ApplyScaleTool.cs：杯子/应用缩放。Matrix4x4 累积线性变换烘焙网格+BoxCollider，存 Assets/烘焙网格/*.asset。**2026-11-09：含 SpriteRenderer（且无 MeshFilter/BoxCollider）的节点跳过烘焙、保留其缩放旋转**（Sprite 没网格可烘，归 1 会"变回原大小"）。
+- PivotToBottomCenter.cs：杯子/Pivot 移到底边中心（按子 Renderer bounds 底边中心偏移子物体 localPosition）。
+- CupMeasureTool.cs：杯子/测量杯子尺寸（顶点换算本地空间，打印杯高/上下底半径/斜率；底部 10% 分带平均半径对锥形杯偏低）。
+- CupLiquidSetup.cs：杯子/液位 ×2——**旧方案**（Cylinder 缩放模拟液位），已被 Cup.cs 动态圆台取代。
+- MilkTeaMaterialSetup.cs：材质/创建奶茶液材质并赋值（Particles/Standard Unlit，存 Assets/Resources/材料/奶茶液.mat）。
+- CupPrefabFixer.cs：材质/修复杯子 Prefab 材质（极简版，按 GLB 源重绑）。
+- CupShaderSetup.cs：材质/配置杯子裁剪 Shader（按 guid 2f25be5a… 加载 CupWithFill.shader 配到奶茶杯预制体）。
+- FluidCellSetupTool.cs：交互界面/给流体格子加点击脚本。LoadPrefabContents 奶茶机交互界面.prefab：名字「流体格子」开头者加 FluidCellButton，
+  按子 text 填默认（牛奶 白(1,1,1,0.9)+forceOpaque / 茶 黄(1,0.85,0.3,0.6)），tintCup=true；同时给「关闭按钮」加 PanelCloseButton(windowRoot=null)；可重复执行。
+- ClockTestMenu.cs：工具/调整时间到 9:00（播放中 SetTime(9,0)；编辑模式改 GameClock 起始时间并 MarkSceneDirty）。
+- MobileOrientationTool.cs：工具/设为横屏(Android)（LandscapeLeft，禁竖屏）。
+- PlayViewBinder.cs：工具/运行时Scene跟随摄像机 [InitializeOnLoad]，勾选态存 EditorPrefs，路径常量 MenuPath 三处共用；EnteredPlayMode 后逐帧 AlignViewToObject(Camera.main)。
+- PrefabQuickTools.cs：预制件/×4 + 右键 ×4；保存自动命名进 Assets/预制件/ 重名弹确认；均带 validate（未选中/播放中禁用，应用/恢复要求 PrefabInstance）。
+- ModelMeasureTool.cs：工具/测量选中模型尺寸(103) → 遍历 Selection 调 ModelMeasurer.LogMeasure。
+- ScrollViewSetupTool.cs（2026-11-09）：交互界面/给选中容器加垂直滚动视图。选中 UI 容器 → 加 ScrollRect + 建 Viewport(RectMask2D，右侧让 20px)
+  + Content(顶对齐竖排 VerticalLayoutGroup+ContentSizeFitter，高度随内容撑开) + 右缘 16px Scrollbar(BottomToTop)；容器原有直接子物体自动移入 Content；
+  horizontal=false、Clamped、滚动条 Permanent；已有 ScrollRect 跳过；全程 Undo。验证=选中对象带 RectTransform。
+- ModelMeasureBatchTool.cs（2026-11-09）：工具/批量测量场景物件尺寸。按特征定位（奶茶机=子「杯位」无「杯位左」、加热机=「杯位左」+「杯位右」、
+  前台=名含前台或有子「台面」、杯架、**冰格/前制作台=挂 IceTray 组件者**（名字含「冰格」会误匹配「关闭冰格按钮」）、路人/大奶茶杯/中奶茶杯/地板）→ ModelMeasurer 量本地尺寸(includeInactive=false) 写 Temp/measure_out.txt；
+  也支持命令行无头 -executeMethod ModelMeasureBatchTool.RunBatch（需 Unity 编辑器未开）。
+
+================================================================
+【场景关键事实】
+================================================================
+
+- **物件尺寸基准（2026-11-09 批量实测，本地尺寸 m；升级换模型时 FitTo 的目标值参考）**：
+  奶茶机 2.00×2.00×2.00（占地 2×2）；加热机 2.00×3.05×2.00；前台 2.05×1.11×16.13（长条柜台）；
+  奶茶杯架 1.72×3.00×4.00；路人 0.40×1.81×0.74；大奶茶杯 0.365×1.43×0.365、中奶茶杯 0.385×1.19×0.385
+  （杯子为杯架容器本地值含模板缩放，非手持实际尺寸）；地板网格是单位 cube，看世界AABB 10×0.1×10。
+  原始数据在 Temp/measure_out.txt；冰格请用修好的匹配（按 IceTray 组件找前制作台）重跑补充。
+- **前制作台（新版 lv1，Blender 模型 2026-11-09 换皮）**：Transform 缩放 = (1, 1, 0.9) —— 这是与游戏内尺寸对上的缩放值，
+  后续做 lv2+ 模型或换皮时按此基准缩放；测量/升级换算时注意它 Z 轴非等比。
+- **模型导入缩放对照表在 Assets/模型缩放尺寸记录.txt**（2026-11-09 建）：各模型导入后应设的缩放值 + 操作流程，尺寸变动两处同步。
+- **物件世界坐标表在 Assets/物件坐标记录.txt**（2026-11-09 建）：前制作台 (-1.72,0.63,-16.12)/奶茶机 (-1.72,2.207,-13.64)/加热机 (-1.72,2.28,-23.35)/前台 (-10,0.55,-16.84)/制冰机 (-1.46,2.08,3.39)/货架 (-6.27,1.16,3.52)/奶茶杯架 (-0.22,1.53,-5.05)；升级替换/重建核对用。
+- 地板(Transform 856793252) 下挂 6 半地板+2 完整地板，全 BoxCollider，顶面 y=0.05。
+- 奶茶机（GameObject 名不可靠，按子节点特征定位）：杯位 local(-0.4,-0.6,0) fileID 1340461808；出料口（需 Ctrl+S 落盘）。
+- 加热机：杯位左 local(-0.5,-0.7,0.5) fileID 263507284；杯位右 local(-0.5,-0.7,-0.5) fileID 1670691904。
+- 路人 PrefabInstance 1193852894，根 localPos(-12,1.166,-16)，guid d0b79f2c…。
+- 奶茶杯架（PrefabInstance 4978722980349000656，源 guid a73b664d…，场景无 override）：
+  「大奶茶杯」「中奶茶杯」容器第 0 子对象=GLB 实例（大 guid 9c671d00 / 中 8f2d555b），m_Mesh 覆盖为烘焙网格（大 8e40283a / 中 c25de16e，**均 Y 镜像**）；
+  其余 4 个子物体是空 "(Clone)" 占位（无网格，CupStack 不会补克隆 → 每容器视觉只有 1 杯）；
+  **所有杯子无 Cup 组件**（运行时 AddComponent）。wrapper 预制件 奶茶杯_大/中.prefab 用未翻转网格，运行时取杯不走它们。
+- 预制件 奶茶机交互界面.prefab：根 600×270 → 容器 → 两「流体格子」(Image fe87c0e1…+Button 4e29b1a8…，子「图标」+「text」牛奶/茶) + 顶栏/关闭按钮；未被场景引用。
+- **Resources/预制件/ 下还有**：设置界面.prefab（结构：设置界面 → 按钮容器[自定义摇杆位置(text)/退出游戏(text)] + 关闭按钮）、商店界面.prefab、物品容器.prefab
+  及机器/杯架等；**注意预制件实际在 Resources/预制件/ 子目录，Resources.Load 路径必须带「预制件/」前缀**（settingsPrefabPath 已改「预制件/设置界面」）。
+- GLB 原始网格：大杯高 0.3152 底r0.0456 顶r0.0875；中杯高 0.38506 底r0.09626 顶r0.18458。杯子材质 GLB 内嵌 BLEND+doubleSided（透明杯）。
+- 日期牌(GO 1831288548)：RectTransform anchor/pivot(0.5,1) anchoredPosition(0,0) sizeDelta(200,175)，Image sprite d56fefa2…；
+  子「text」stretch+sizeDelta(-100,-130) pos(0,15) scale0.8，Text fontSize30 居中；Animator(fileID 1831288552) controller 日期牌.controller，仅参数 bool Open。
+  贴图 2200×2200 上半才有像素（推出屏幕=全透明不可见）。Canvas 2124844271（800×600 match=width），时钟预制体右上 anchor(1,1) pos(-50,-50)。
+- 存档：%USERPROFILE%\AppData\LocalLow\<公司>\<产品>\gameTime.json {"day":N,"wallet":M}；删文件=回第 1 天 8:00。
+
+================================================================
+【历史经验教训】
+================================================================
+
+1. 场景中文 YAML 存 \uXXXX，grep 搜不到，要 python unicode_escape 解码
+2. csc 验证引用：facade（Managed\UnityEngine.dll / UnityEditor.dll / Managed\UnityEngine\UnityEditor.dll）与模块 DLL 不可混用——完整可用组合见【项目元信息】
+3. ApplyScaleTool 累积变换用 Matrix4x4，别 Quaternion+Vector3 分开（非均匀缩放×旋转不可交换）
+4. BoxCollider 无法表示旋转，近似用三轴向量长度换算 size
+5. 地面检测先过滤 IsChildOf(transform) 的自身 Collider
+6. 新节点未 Ctrl+S → 磁盘场景查不到（FindSlot/名字查找失败先怀疑没保存）
+7. ParticleSystem Shape 局部旋转×LocalSimulationSpace：SetParent 继承 nozzle 旋转 + gravity 世界坐标会错位；修：只拷 position
+8. Cone 默认 local+Z 发射，绕 X 轴 +90° 向下落水，-90° 向上喷泉
+9. StartsWith 名字歧义："奶茶杯_中" 会匹配 "奶茶杯_中(Clone)"；模板用名「中奶茶杯」避开
+10. m_LocalEulerAnglesHint 是 Editor 显示缓存，真实旋转看 m_LocalRotation 四元数
+11. 重构原则：状态+行为下沉到设备组件，协调器只做"谁在近处+弹按钮+转发"
+12. 设备 GameObject 名不可靠（可能用别的 Prefab 搭）→ AutoAttach 用子节点特征反查（「杯位」/「出料口」）
+13. C# 元组解构：var (cup, scale) = TakeCup(...) 直接可用
+14. JSON 存档：JsonUtility+persistentDataPath 即可；恢复放 Start 不放 Awake（保证 ShopManager.Instance 已初始化）
+15. UI 挂点优先用场景已有节点改内容，别 new 组件覆盖用户美术排版
+16. 液面/包围盒：①Renderer.bounds 是世界 AABB，物体旋转会膨胀/错位 → 用网格本地包围盒角点换算；②Mesh 顶点含 baseY 时 localPosition 别再叠偏移；③CupMeasureTool 底部分带平均半径对锥形杯偏低
+17. UGUI：anchor(0.5,1) 时 anchoredPosition +y 向上出屏，往下填负数；pivot(0.5,1)+y=0 才贴屏幕顶；Scene 视图按参考尺寸居中，可见性以 Game 视图/Canvas 尺寸算
+18. AddComponent 立刻执行 Awake：随后才赋的字段 Awake 里读的是默认值 → 初始化惰性化（用时按当前值重算），或先 SetActive(false) 挂组件赋值后再激活
+19. 杯架杯子=GLB 实例+m_Mesh 烘焙网格覆盖，不是 wrapper 预制体；「原生大小」烘焙网格 Y 镜像（杯口在 local -Y），统一 X 180° 翻正
+20. 手动微调的液体 Transform 反算参数：Y 缩放 sy→高×sy 斜率÷sy；等比 s→底 r×s 斜率不变；位置直接写死 liquidLocalY 绝对值，别用 cupMinY+偏移（大杯运行时 cupMinY≈-0.0665≠网格推的 -0.4272）；反算后逐 fillLevel 复算验证
+21. 打包后洋红=运行时缺材质/Shader（非 32/64 位问题）：资源加载别写 #if UNITY_EDITOR；未引用又不在 Resources 的资产不进包；拿不到材质宁可不赋值也别赋 null
+22. Editor+运行时一起 csc 验证的引用组合见【项目元信息】（2026-11-09 实测）
+23. **AutoAttach 反查必须用「直接子节点」特征**（2026-11-09）：递归查找会把组件挂到父级容器（前制作台子树里也有杯位）；
+    机器从父级移出后挂错对象（TeaMachine 挂到加热机 → 找不到出料口 → 不出液）。TeaMachine 还跳过有「杯位左/右」者
+
+================================================================
+【当前待做 / 已知 TODO】
+================================================================
+
+- 场景待 Ctrl+S：出料口节点、「商店」按钮（2026-11-09 新加，磁盘场景尚无）
+- 几何隐患（未改，等确认）：杯网格 Y 翻转，液体从杯口端向杯底生长、半径渐大，与杯壁收窄方向相反；要改需从 cupMaxY 向下生成或液体加 Y 翻转
+- 日期牌动画待 Play 验证（进新一天/重进游戏展开 3s 收回）；时长不匹配可调 GameClock.dayBoardOpenSeconds
+- Unity 验证：① TeaMachine/HeaterMachine AutoAttach 到正确设备（有「杯位」/「杯位左+右」子节点者）② 杯子手持/上机 X 旋转 180° ③ 杯架堆叠不嵌地板（每容器仅第 0 个是真杯）
+- 存档验证：退出重进恢复天数/钟点；16:00 打烊后重进回当天 8:00；删 gameTime.json 可从第 1 天重测
+- PourFluid 参数（颜色/粗细/duration/gravity）可能还要调；路人 groundProbeDistance=4m 当前够用
+- 隐患（未改）：CupInteract.OnInject/OnHeat 在 PlaceCup 失败时也置空 heldCup；当前可见性已挡，若出现"杯卡手/消失"再把 PlaceCup 返回值改成功标志
+- 商店购买升级逻辑待做：买升级 → MachineLevel.Get(id).Upgrade()（升等级解锁功能）+ ModelScaler.UpgradeReplace（预制件整棵替换，新预制件需自带 IceTray/MachineLevel/Animator/碰撞箱）；测试可用 MachineLevel 的 ContextMenu「升 1 级（测试）」
+- machinePanelPrefab 需在 Main Camera 的 CupInteract 上拖入 预制件/奶茶机交互界面.prefab；流体格子改色/加 forceOpaque 后需重跑菜单「奶茶店/交互界面/给流体格子加点击脚本」写进预制体
+- 商店界面（2026-11-09）：预制件在 **Assets/Resources/预制件/商店界面.prefab**（结构：根「商店界面」→ 顶栏/关闭按钮 + 商店容器[ScrollRect→Viewport/Content/Scrollbar]，物品容器.prefab 同目录）。
+  打开=点「商店」图标（ComingSoonTip.OpenShopPanel），关闭=顶栏「关闭按钮」（自动补 PanelCloseButton）已通；**待做：往 Content 里填商品/购买逻辑**。
+  若场景里还留着编辑时的「商店界面」实例，建议删掉或设为未激活（OpenShopPanel 场景优先，场景没有才走 Resources 实例化）。
+
+================================================================
+【最近 5 次对话摘要】
+================================================================
+
+㊶ 2026-11-09 · 商店容器加垂直滚动视图：新增 Editor ScrollViewSetupTool.cs 菜单「奶茶店/交互界面/给选中容器加垂直滚动视图」(priority 81)。
+   选中容器→ScrollRect+Viewport(RectMask2D)+Content(VerticalLayout+ContentSizeFitter 顶对齐)+右缘 Scrollbar；原有子物体自动移入 Content；可 Undo。
+   用户随后已把「商店界面」「物品容器」拖到 Assets/Resources/预制件/ 成预制件。
+
+㊷ 2026-11-09 · 商店界面开关接通：ComingSoonTip 加 OpenShopPanel（场景优先找「商店界面」，否则 Resources.Load("预制件/商店界面") 实例化到 Canvas；
+   首开时 EnsureShopCloseButton 给名字含「关闭」的 Button 补 PanelCloseButton，幂等）；BindIcons 加「商店」分支（shopIconKeyword）。
+   PanelCloseButton 的 windowRoot 自动查找关键词「交互界面」→「界面」放宽。37 个 .cs csc EXIT=0。
+
+㊸ 2026-11-09 · 设置界面「自定义摇杆位置」功能：新增 JoystickPositionAdjuster.cs（static，Begin=positionEditMode+藏设置面板+运行时建
+   「确定位置/重置默认」UI）；VirtualJoystick 加 positionEditMode（拖动=整体移动摇杆，delta÷canvas.scaleFactor）+ PlayerPrefs(JoystickPosX/Y)
+   持久化（Start 恢复 / SavePosition / ResetPosition 回 Awake 捕获的默认位）；ComingSoonTip 首开设置面板时 EnsureSettingsButtons 绑定
+   （关闭→PanelCloseButton、摇杆→Begin）。顺带修复：设置界面预制件已移到 Resources/预制件/，settingsPrefabPath 默认值改「预制件/设置界面」。
+   38 个 .cs csc EXIT=0。待验证：拖动摇杆→确定→重进游戏位置保持；「退出游戏」按钮未接线（TODO）。
+
+㊹ 2026-11-09 · 物件尺寸测量 + 升级防穿模缩放：新增运行时 ModelScaler.cs（UpgradeReplace=量旧尺寸→原位实例化新预制件→FitTo 等比缩放→Destroy 旧；
+   FitMode 三档，默认 UniformFitInside 绝不穿模）；新增 Editor ModelMeasureBatchTool.cs 菜单「奶茶店/工具/批量测量场景物件尺寸」(104)，
+   结果写 Temp/measure_out.txt；39 个 .cs csc EXIT=0（修过 1 个 static 类漏 Object.Instantiate 的 CS0103）。
+   **已跑完并合并进【场景关键事实】物件尺寸基准**；冰格匹配误中「关闭冰格按钮」→ 改按 IceTray 组件找前制作台，重跑菜单可补充。
+
+㊺ 2026-11-09 · 通用物件等级 MachineLevel + 冰格等级解锁：新增 MachineLevel.cs（level/maxLevel/machineId/Upgrade()/Get(id)，
+   PlayerPrefs 存「MachineLevel_{id}」，AutoAttach 前制作台/前台，ContextMenu 可测试升级）；IceTray 加 unlockSource/unlockLevel(2)/IsUnlocked
+   （惰性查找避开 Awake 顺序坑）；CupInteract 冰格按钮显隐加 IsUnlocked 判定 → 1 级无冰格按钮、2 级开放取冰。40 个 .cs csc EXIT=0。

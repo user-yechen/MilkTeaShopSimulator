@@ -1,0 +1,50 @@
+# ============================================================
+# 奶茶店项目 .gitignore（Unity 2022.3）
+# 原则：Assets / ProjectSettings / Packages / Docs 必须进库；
+#       Library 等自动生成目录（约 5.4 GB）不进库。
+# ============================================================
+
+# ---- Unity 自动生成 ----
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+
+# ---- IDE / 编译产物 ----
+.vs/
+.idea/
+.vscode/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# ---- 本项目临时文件 ----
+.screenshots/
+
+# 旧编译产物（脚本本体在 Assets/脚本/CounterCupDisplay.cs）
+/CounterCupDisplay.dll
+
+# ---- 出包 ----
+*.apk
+*.aab
+*.unitypackage
+
+# ---- 系统 ----
+.DS_Store
+Thumbs.db
+desktop.ini
