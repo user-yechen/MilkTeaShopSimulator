@@ -27,6 +27,7 @@
 | 美术怎么生产 / Agent 怎么分工 | Docs/02-规范/美术产线方案.md、Docs/06-Agents/2D美术Agent.md、Docs/06-Agents/3转2图标Agent.md |
 | 3D 模型生产（Tripo 2D→3D） | Docs/06-Agents/3D模型Agent.md |
 | 文案 / 文本表 / key 规范 | Docs/06-Agents/文案Agent.md、Assets/Resources/文案/文案表.csv |
+| 音乐 / BGM / 音频规范 | Docs/06-Agents/音乐Agent.md、Tools/Music/ |
 | 3D 生成（Tripo 云 / 本地 TripoSR） | Docs/05-3D/3D资产管线-Tripo.md |
 | 物件摆放 / 穿模怎么解决 | Docs/02-规范/摆放与穿模规范.md |
 | 角色 / 流程 / 交接 / RACI | Docs/04-团队/团队架构.md |
@@ -95,6 +96,8 @@
   二次测试（金币/货架/奶茶机）结论：只适合圆润单件，设备与薄结构不可用，成果在 `模型测试/`；
   已切 GPU：torch 2.14.1+cu126（SJTU 镜像装轮子），256 分辨率约 6.8 s/个，比 CPU 快一倍
 - 2026-11-27 文案：文案 Agent + CSV 文案表 + GText 运行时 + TextImportTool 校验/生成 Key
+- 2026-11-27 音乐：新增音乐 Agent（钢琴/Pad/木吉他/鼓）+ Tools/Music/make_bgm.py 生成 MIDI；
+  已出 day_loop / night_loop 两首 16 小节循环，待 DAW 挂音源试听混音
 - 2026-11-09 玩法：商店购买、摇杆位置自定义、冰格等级解锁、尺寸测量与升级换模缩放
 - 历史细节看 git log 与各文档，不再堆在这里
 

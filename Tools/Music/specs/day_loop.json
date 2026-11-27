@@ -1,0 +1,13 @@
+{
+  "name": "day_loop",
+  "bpm": 96,
+  "bars": 16,
+  "beatsPerBar": 4,
+  "chords": ["C", "Am", "F", "G"],
+  "instruments": {
+    "piano": { "program": 0, "pattern": "arp" },
+    "pad": { "program": 89, "pattern": "sustain" },
+    "guitar": { "program": 24, "pattern": "finger" },
+    "drums": { "pattern": "basic" }
+  }
+}

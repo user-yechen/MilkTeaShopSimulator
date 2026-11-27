@@ -15,6 +15,7 @@
    - 美术 / 图标 / 风格 → `Docs/02-规范/美术风格.md`、`Docs/06-Agents/*.md`
    - 3D 模型生产 → `Docs/06-Agents/3D模型Agent.md`（Tripo 2D→3D）
    - 文案 / 文本 → `Docs/06-Agents/文案Agent.md`、`Assets/Resources/文案/文案表.csv`
+   - 音乐 / BGM → `Docs/06-Agents/音乐Agent.md`、`Tools/Music/`
    - 摆放 / 穿模 → `Docs/02-规范/摆放与穿模规范.md`
    - 3D 生成原理 / 本地 TripoSR → `Docs/05-3D/3D资产管线-Tripo.md`
 4. **用 3–5 条 bullet 向用户复述**：

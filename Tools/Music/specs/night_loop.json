@@ -1,0 +1,12 @@
+{
+  "name": "night_loop",
+  "bpm": 72,
+  "bars": 16,
+  "beatsPerBar": 4,
+  "chords": ["Am", "F", "C", "G"],
+  "instruments": {
+    "piano": { "program": 0, "pattern": "block" },
+    "pad": { "program": 89, "pattern": "sustain" },
+    "guitar": { "program": 25, "pattern": "finger" }
+  }
+}
