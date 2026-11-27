@@ -1,0 +1,17 @@
+{
+  "id": "topping_pearl",
+  "name": "珍珠",
+  "category": "小料",
+  "type": "3d",
+  "triBudget": 200,
+  "size": [0.06, 0.06, 0.06],
+  "pivot": "bottom-center",
+  "forward": "+Z",
+  "materials": 1,
+  "textureSize": 256,
+  "collider": "none",
+  "prefab": "Assets/Resources/预制件/小料/珍珠.prefab",
+  "source": "ArtSource/3D/raw/topping_pearl.glb",
+  "deliverable": "Assets/模型/道具/珍珠.glb",
+  "notes": "杯内小料，可用半球+位移贴图；颜色取色板 #2B1A12"
+}

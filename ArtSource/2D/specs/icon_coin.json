@@ -1,0 +1,9 @@
+{
+  "id": "icon_coin",
+  "name": "金币",
+  "type": "coin",
+  "size": [512, 512],
+  "palette": ["#F5D060", "#C08000", "#605000"],
+  "states": ["normal", "pressed", "disabled"],
+  "output": "ArtSource/2D/icons/UI_金币.png"
+}

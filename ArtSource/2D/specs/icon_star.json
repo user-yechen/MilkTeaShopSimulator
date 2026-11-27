@@ -1,0 +1,9 @@
+{
+  "id": "icon_star",
+  "name": "星级",
+  "type": "star",
+  "size": [512, 512],
+  "palette": ["#F5D060", "#E0A000", "#7A5600"],
+  "states": ["normal"],
+  "output": "ArtSource/2D/icons/UI_星级.png"
+}

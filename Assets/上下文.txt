@@ -301,3 +301,11 @@
    `Unity.exe -batchmode -quit -projectPath <路径> -buildTarget Android -executeMethod BuildScript.BuildAndroid -logFile Build/build.log`，
    产物 Build/Android/milktea_{版本}_{时间}.apk；已实测 Build Finished Success（arm64+armv7 / minSdk22 / targetSdk35 / debug 签名）。
    **注意**：换包名后存档目录从 LocalLow\123\ 变为 LocalLow\yechen\，旧存档不自动迁移。
+
+㊼ 2026-11-27 · 美术风格与内容产线：扫描 18 张 2D 贴图（2200² 为主）+ 15 个 3D 模型（12–1692 三角面、单材质、贴图≤1.2MB），
+   产出 **Docs/美术风格.md**（定位/色板/面数预算/3D 与 UI 规范/Do-Don't/AI 提示词）+ Docs/美术参考/（色板、素材扫描表、模型渲染图）；
+   确定色板：UI 蓝 #0090F0/#0040F0、强调橙 #F07000、金币 #F0C000、木牌 #C09040、地板 #EFE4B0、奶茶液 #A67D54。
+   新增 **Docs/Agents/2D美术Agent.md**（UI 图标/产品图/QA 三角色 + spec 模板 + 验收清单）与 **Docs/3D资产管线-Tripo.md**
+   （Tripo 支持 DSH 插件/CLI/MCP，`tripo login` 浏览器授权无需 API Key；`make --for game-mobile -p face_limit=1500` 实测有效）。
+   新增工具：Tools/Art2D/make_ui_icon.py（金币/齿轮/星标已出图，三态）、Tools/3D/decimate_to_budget.py（奶茶机 624→400 面实测通过）；
+   ArtSource/ 存放不参与 Unity 导入的源文件（2D 源图、3D raw/final、spec）。

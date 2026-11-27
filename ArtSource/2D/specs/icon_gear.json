@@ -1,0 +1,9 @@
+{
+  "id": "icon_gear",
+  "name": "设置",
+  "type": "gear",
+  "size": [512, 512],
+  "palette": ["#E0E0E0", "#808080", "#404040"],
+  "states": ["normal"],
+  "output": "ArtSource/2D/icons/UI_设置.png"
+}
