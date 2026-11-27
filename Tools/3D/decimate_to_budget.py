@@ -21,7 +21,17 @@ def parse_args():
 def main():
     a = parse_args()
     bpy.ops.wm.read_factory_settings(use_empty=True)
-    bpy.ops.import_scene.gltf(filepath=os.path.abspath(a.src))
+    src = os.path.abspath(a.src)
+    ext = os.path.splitext(src)[1].lower()
+    if ext in (".glb", ".gltf"):
+        bpy.ops.import_scene.gltf(filepath=src)
+    elif ext == ".obj":
+        bpy.ops.wm.obj_import(filepath=src)
+    elif ext == ".fbx":
+        bpy.ops.import_scene.fbx(filepath=src)
+    else:
+        print("ERROR: 不支持的格式 " + ext)
+        sys.exit(1)
 
     meshes = [o for o in bpy.context.scene.objects if o.type == "MESH"]
     if not meshes:

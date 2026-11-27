@@ -168,3 +168,72 @@ Tripo 的商业模型不能本地部署；可本地跑的是它的开源版 **Tr
 | 风格漂移 | 和现有低模不搭 | 参考图用项目内模型渲染图；生成后按色板校色 |
 | 贴图过大 | 包体膨胀 | 降到 512–1024，只留 BaseColor |
 | 多物体 | 一张图出多个物件 | 输入图只放一个物体，或用网格分割接口 |
+
+---
+
+## 7. 本地 TripoSR 实测（2026-11-27，Windows / 4070 Laptop）
+
+> 结论先说：**能跑通，CPU 约 15 秒一个**；输出是 9.7 万面 + 顶点色、无 UV 无贴图，必须减面 + 美术 Agent 赋材质。
+> 适合「白模起型」，不适合直接当成品。
+
+![TripoSR 对比](美术参考/TripoSR_对比.png)
+
+### 7.1 环境
+
+| 项 | 版本 / 说明 |
+|---|---|
+| Python | 3.12（独立 venv：`D:\Tools\triposr-env`） |
+| PyTorch | 2.15.0+cpu（CUDA 轮子 2.4GB 下载停滞，先跑 CPU） |
+| transformers | 4.44.2 + tokenizers 0.19.1（4.35 在 Py3.12 上没有 tokenizers 预编译轮子） |
+| 其他 | rembg[cpu] 2.0.88、trimesh 4.0.5、scikit-image、xatlas 0.0.9、moderngl 5.10.0 |
+| 权重 | ModelScope `AI-ModelScope/TripoSR`：config.yaml + model.ckpt（1.6 GB） |
+| DINO 主干 | ModelScope `facebook/dino-vitb16`：config/preprocessor/pytorch_model.bin（327 MB） |
+
+> HuggingFace 直连超时、hf-mirror 的大文件 302 到被墙 CDN，所以全部走 ModelScope 下载。
+
+### 7.2 源码补丁（3 处，均在 `D:\Tools\TripoSR`）
+
+| 文件 | 改动 | 原因 |
+|---|---|---|
+| `tsr/models/isosurface.py` | `torchmcubes` 导入失败时回退到 `skimage.measure.marching_cubes`，并对顶点 `np.ascontiguousarray` | torchmcubes 在 Windows 无预编译轮子、编译要 MSVC+CUDA；skimage 返回负 stride 会报错 |
+| `tsr/models/tokenizers/image.py` | 本地目录走 `ViTModel.from_pretrained(path)` | 原代码只从 HF 拉 config，且不会加载 DINO 权重 |
+| `run.py` | 每个输入先 `os.makedirs(output_dir/i)` | `--no-remove-bg` 时不会建子目录，导出报 FileNotFoundError |
+
+另：`weights/config.yaml` 里 `pretrained_model_name_or_path` 改为本地 DINO 目录。
+
+### 7.3 命令与耗时
+
+```powershell
+cd D:\Tools\TripoSR
+$env:HF_HUB_OFFLINE='1'; $env:TRANSFORMERS_OFFLINE='1'
+D:\Tools\triposr-env\Scripts\python.exe run.py D:\Tools\triposr-input\coin_white.png `
+  --device cpu --pretrained-model-name-or-path D:\Tools\TripoSR\weights `
+  --output-dir D:\Tools\triposr-out --mc-resolution 192 --no-remove-bg
+```
+
+| 阶段 | 耗时（CPU / 192 分辨率） |
+|---|---:|
+| 加载模型 | 2.3 s |
+| 图像编码 + 三平面推理 | 6.2 s |
+| Marching Cubes 提网格 | 6.4 s |
+| 导出 OBJ | 0.2 s |
+| **合计** | **约 15 s** |
+
+输出：`mesh.obj`，**97,606 三角面**，带顶点色，无 UV、无贴图。
+
+### 7.4 减面结果（用 `Tools/3D/decimate_to_budget.py`）
+
+| 目标面数 | 视觉 | 结论 |
+|---:|---|---|
+| 97k（原始） | 浮雕清楚，表面噪点多、边缘圆钝 | 不可直接用 |
+| 1,200 | ¥ 浮雕保留，轮廓可辨 | **可用作白模**，需重拓扑/校色 |
+| 300 | 浮雕完全丢失，变成鹅卵石 | 太低，别用 |
+
+### 7.5 经验
+
+1. **输入图决定上限**：用平面图标当输入，重建出来是「圆饼」；用项目内模型的 3/4 渲染图效果会好很多。
+2. **TripoSR 只给白模**：顶点色勉强能看，正式资产要美术 Agent 按色板赋材质（单色 + 轻度渐变）。
+3. **减面别一步到 300**：先减到 1–2k，再手工/重拓扑降到预算。
+4. **CPU 够用**：15 秒/个，批量 20 个也只要 5 分钟；CUDA 可再快，但不是必需。
+5. **权重放本地**：`--pretrained-model-name-or-path` 指向本地目录，配合 `HF_HUB_OFFLINE=1` 避免联网卡住。
+

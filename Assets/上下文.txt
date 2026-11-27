@@ -318,3 +318,10 @@
    **Docs/团队架构.md**（角色地图、5 个 Agent 清单、工作流 5 道 Gate、交接契约、RACI、能力缺口）、
    **Docs/文档导航.md**（全部文档入口 + 维护规则）。至此文档分工：上下文=项目记忆，数据手册=数值，脚本接口=API，
    团队架构=分工，美术风格=规范，产线清单=排期。
+㊿ 2026-11-27 · 本地 TripoSR 跑通（只出白模，贴图留给美术 Agent）：独立 venv D:\Tools\triposr-env（Python 3.12 + torch 2.15 CPU +
+   transformers 4.44.2 + tokenizers 0.19.1 + rembg[cpu]）；HF 直连/hf-mirror 大文件都被墙，权重改从 **ModelScope**
+   （AI-ModelScope/TripoSR 的 config.yaml+model.ckpt 1.6GB、acebook/dino-vitb16 327MB）下载并本地加载；
+   改源码 3 处：isosurface.py 无 torchmcubes 时回退 skimage、image.py 支持本地目录 from_pretrained、run.py 补建输出子目录。
+   实测 CPU/192 分辨率 **约 15 秒/个**（加载 2.3s + 推理 6.2s + 提网格 6.4s），输出 97,606 面 + 顶点色、无 UV/贴图；
+   减面 1,200 保留 ¥ 浮雕、300 面丢失细节。产物 ArtSource/3D/final/coin_triposr.glb，对比图 Docs/美术参考/TripoSR_对比.png，
+   完整步骤见 Docs/3D资产管线-Tripo.md 第 7 节。
