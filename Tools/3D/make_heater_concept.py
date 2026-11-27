@@ -77,33 +77,48 @@ SCREEN = mat("screen", (0.05, 0.25, 0.3), metallic=0.0, rough=0.2,
 TRAY = mat("tray", (0.06, 0.06, 0.065), metallic=0.4, rough=0.5)
 PIPE = mat("pipe", (0.16, 0.16, 0.18), metallic=0.6, rough=0.4)
 
-# 机身
-cube("body", (0, 0, 0.25), (0.30, 0.34, 0.50), STEEL, bevel=0.008)
+# 机身（前面板下方挖出内凹的放杯空间）
+body = cube("body", (0, 0, 0.25), (0.30, 0.34, 0.50), STEEL, bevel=0.008)
 
-# 前面板（贴在正面，略倾斜）
-cube("panel", (0, -0.168, 0.435), (0.28, 0.030, 0.150), PANEL,
+bpy.ops.mesh.primitive_cube_add(size=1, location=(0, -0.11, 0.265))
+cutter = bpy.context.object
+cutter.scale = (0.24, 0.12, 0.21)
+bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+mod = body.modifiers.new("cut", "BOOLEAN")
+mod.object = cutter
+mod.operation = "DIFFERENCE"
+bpy.context.view_layer.objects.active = body
+bpy.ops.object.modifier_apply(modifier="cut")
+bpy.data.objects.remove(cutter, do_unlink=True)
+
+# 前面板（向外悬挑，遮住内凹上沿）
+cube("panel", (0, -0.190, 0.435), (0.28, 0.045, 0.150), PANEL,
      rot=(math.radians(-10), 0, 0), bevel=0.004)
 # 屏幕
-cube("screen", (0, -0.187, 0.462), (0.080, 0.006, 0.045), SCREEN,
+cube("screen", (0, -0.214, 0.462), (0.080, 0.006, 0.045), SCREEN,
      rot=(math.radians(-10), 0, 0), bevel=0.002)
 # 按键
 for i in range(5):
     x = -0.080 + i * 0.040
-    cyl("btn_%d" % i, (x, -0.187, 0.405), 0.0075, 0.007, DARK,
+    cyl("btn_%d" % i, (x, -0.214, 0.405), 0.0075, 0.007, DARK,
         rot=(math.radians(80), 0, 0), verts=16)
 
-# 蒸汽杆 + 红色手柄
+# 蒸汽杆：垂直下 → 向外折一次 → 保持方向垂下（伸进内凹区）
 for side, x in ((-1, -0.070), (1, 0.070)):
-    cyl("handle_%d" % side, (x, -0.180, 0.372), 0.014, 0.034, RED,
+    cyl("handle_%d" % side, (x, -0.205, 0.372), 0.014, 0.034, RED,
         rot=(math.radians(80), 0, 0), verts=20)
-    cyl("wand_%d" % side, (x, -0.196, 0.265), 0.012, 0.200, PIPE,
-        rot=(math.radians(6), 0, 0), verts=16)
-    cyl("nozzle_%d" % side, (x, -0.199, 0.160), 0.006, 0.026, PIPE,
-        rot=(math.radians(6), 0, 0), verts=12)
+    cyl("wand_top_%d" % side, (x, -0.200, 0.355), 0.012, 0.030, PIPE,
+        rot=(0, 0, 0), verts=16)
+    cyl("wand_elbow_%d" % side, (x, -0.220, 0.320), 0.012, 0.060, PIPE,
+        rot=(math.radians(-45), 0, 0), verts=16)
+    cyl("wand_dn_%d" % side, (x, -0.240, 0.235), 0.012, 0.130, PIPE,
+        rot=(0, 0, 0), verts=16)
+    cyl("nozzle_%d" % side, (x, -0.240, 0.172), 0.006, 0.025, PIPE,
+        rot=(0, 0, 0), verts=12)
 
-# 接水盘
-cube("tray_base", (0, -0.085, 0.030), (0.30, 0.20, 0.040), TRAY, bevel=0.003)
-cube("tray_top", (0, -0.085, 0.042), (0.27, 0.16, 0.006), DARK, bevel=0.001)
+# 接水盘（内凹区底面，前沿略突出）
+cube("tray_base", (0, -0.135, 0.170), (0.26, 0.14, 0.022), TRAY, bevel=0.003)
+cube("tray_top", (0, -0.135, 0.182), (0.24, 0.12, 0.005), DARK, bevel=0.001)
 
 # 支脚
 for sx in (-1, 1):
