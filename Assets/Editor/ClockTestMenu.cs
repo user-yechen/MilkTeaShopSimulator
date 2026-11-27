@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 /// <summary>顶部菜单栏里的测试功能</summary>
 public static class ClockTestMenu
 {
-    [MenuItem("奶茶店/工具/调整时间到 9:00", false, 100)]
+    [MenuItem("奶茶店/归档/工具/调整时间到 9:00", false, 100)]
     static void SetTimeToNine()
     {
         // 运行时：直接把游戏时钟跳到 9:00

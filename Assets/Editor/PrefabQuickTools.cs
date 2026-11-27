@@ -6,7 +6,7 @@ using UnityEngine;
 /// 预制件快捷工具：
 ///   - 选中场景物件 → 一键保存为预制件（自动命名 + 放到 Assets/预制件/）
 ///   - 选中 PrefabInstance → 一键应用修改到预制件 / 恢复预制件
-/// 入口：顶部菜单「奶茶店/预制件/」、右键上下文菜单、快捷键 Ctrl+Shift+S (保存) / Ctrl+Shift+A (应用)
+/// 入口：顶部菜单「奶茶店/归档/预制件/」、右键上下文菜单、快捷键 Ctrl+Shift+S (保存) / Ctrl+Shift+A (应用)
 /// </summary>
 public static class PrefabQuickTools
 {
@@ -14,14 +14,14 @@ public static class PrefabQuickTools
 
     // ====== 新建预制件 ======
 
-    [MenuItem("奶茶店/预制件/保存选中为预制件 %#s", true)]
+    [MenuItem("奶茶店/归档/预制件/保存选中为预制件 %#s", true)]
     [MenuItem("CONTEXT/GameObject/保存为预制件", true)]
     static bool ValidateCreatePrefab()
     {
         return Selection.activeGameObject != null && !Application.isPlaying;
     }
 
-    [MenuItem("奶茶店/预制件/保存选中为预制件 %#s", false, 60)]
+    [MenuItem("奶茶店/归档/预制件/保存选中为预制件 %#s", false, 60)]
     [MenuItem("CONTEXT/GameObject/保存为预制件")]
     static void CreatePrefab()
     {
@@ -51,7 +51,7 @@ public static class PrefabQuickTools
 
     // ====== 应用修改到预制件 ======
 
-    [MenuItem("奶茶店/预制件/应用选中的预制件实例 %#a", true)]
+    [MenuItem("奶茶店/归档/预制件/应用选中的预制件实例 %#a", true)]
     [MenuItem("CONTEXT/GameObject/应用到预制件", true)]
     static bool ValidateApplyPrefab()
     {
@@ -59,7 +59,7 @@ public static class PrefabQuickTools
         return PrefabUtility.IsPartOfPrefabInstance(Selection.activeGameObject);
     }
 
-    [MenuItem("奶茶店/预制件/应用选中的预制件实例 %#a", false, 61)]
+    [MenuItem("奶茶店/归档/预制件/应用选中的预制件实例 %#a", false, 61)]
     [MenuItem("CONTEXT/GameObject/应用到预制件")]
     static void ApplyPrefab()
     {
@@ -81,7 +81,7 @@ public static class PrefabQuickTools
 
     // ====== 恢复预制件 ======
 
-    [MenuItem("奶茶店/预制件/恢复选中的预制件实例", true)]
+    [MenuItem("奶茶店/归档/预制件/恢复选中的预制件实例", true)]
     [MenuItem("CONTEXT/GameObject/恢复预制件", true)]
     static bool ValidateRevertPrefab()
     {
@@ -89,7 +89,7 @@ public static class PrefabQuickTools
         return PrefabUtility.IsPartOfPrefabInstance(Selection.activeGameObject);
     }
 
-    [MenuItem("奶茶店/预制件/恢复选中的预制件实例", false, 62)]
+    [MenuItem("奶茶店/归档/预制件/恢复选中的预制件实例", false, 62)]
     [MenuItem("CONTEXT/GameObject/恢复预制件")]
     static void RevertPrefab()
     {
@@ -107,13 +107,13 @@ public static class PrefabQuickTools
 
     // ====== 把选中替换成预制件 ======
 
-    [MenuItem("奶茶店/预制件/用预制件替换选中", true)]
+    [MenuItem("奶茶店/归档/预制件/用预制件替换选中", true)]
     static bool ValidateReplaceWithPrefab()
     {
         return Selection.activeGameObject != null && !Application.isPlaying;
     }
 
-    [MenuItem("奶茶店/预制件/用预制件替换选中", false, 63)]
+    [MenuItem("奶茶店/归档/预制件/用预制件替换选中", false, 63)]
     static void ReplaceWithPrefab()
     {
         GameObject go = Selection.activeGameObject;

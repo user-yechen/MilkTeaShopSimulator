@@ -3,7 +3,7 @@ using UnityEditor;
 
 public static class CupPrefabFixer
 {
-    [MenuItem("奶茶店/材质/修复杯子 Prefab 材质（极简版）", false, 41)]
+    [MenuItem("奶茶店/归档/材质/修复杯子 Prefab 材质（极简版）", false, 41)]
     static void Fix()
     {
         string[] cups = {

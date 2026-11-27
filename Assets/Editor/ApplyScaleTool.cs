@@ -10,7 +10,7 @@ using UnityEditor;
 /// </summary>
 public static class ApplyScaleTool
 {
-    [MenuItem("奶茶店/杯子/将当前大小设为原生大小（应用缩放）", false, 21)]
+    [MenuItem("奶茶店/归档/杯子/将当前大小设为原生大小（应用缩放）", false, 21)]
     static void ApplyScale()
     {
         System.IO.Directory.CreateDirectory("Assets/烘焙网格");
@@ -24,7 +24,7 @@ public static class ApplyScaleTool
         AssetDatabase.SaveAssets();
     }
 
-    [MenuItem("奶茶店/杯子/将当前大小设为原生大小（应用缩放）", true)]
+    [MenuItem("奶茶店/归档/杯子/将当前大小设为原生大小（应用缩放）", true)]
     static bool ApplyScaleValidate() => Selection.activeGameObject != null;
 
     /// <summary>parentLinear 为父层级累计的旋转+缩放矩阵（不含位移），逐层累计后烘焙</summary>

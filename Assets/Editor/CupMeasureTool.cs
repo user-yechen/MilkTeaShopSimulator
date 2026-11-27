@@ -9,7 +9,7 @@ using System.Collections.Generic;
 /// </summary>
 public class CupMeasureTool
 {
-    [MenuItem("奶茶店/杯子/测量选中杯子尺寸", false, 20)]
+    [MenuItem("奶茶店/归档/杯子/测量选中杯子尺寸", false, 20)]
     static void Measure()
     {
         var selections = Selection.gameObjects;

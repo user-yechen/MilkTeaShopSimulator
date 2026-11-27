@@ -8,7 +8,7 @@ using UnityEditor.SceneManagement;
 /// </summary>
 public static class CupShaderSetup
 {
-    [MenuItem("奶茶店/材质/配置杯子裁剪 Shader", false, 42)]
+    [MenuItem("奶茶店/归档/材质/配置杯子裁剪 Shader", false, 42)]
     static void Setup()
     {
         // 用 guid 直接加载 shader，比 Shader.Find 更可靠

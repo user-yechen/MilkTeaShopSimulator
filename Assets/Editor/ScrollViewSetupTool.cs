@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 菜单「奶茶店/交互界面/给选中容器加垂直滚动视图」：
+/// 菜单「奶茶店/归档/交互界面/给选中容器加垂直滚动视图」：
 /// 把选中的 UI 容器（如「商店容器」）改造成标准垂直滚动视图：
 ///   容器（加 ScrollRect）
 ///   ├─ Viewport（RectMask2D 裁剪，右侧留 20px 给滚动条）
@@ -17,7 +17,7 @@ public static class ScrollViewSetupTool
     const float ScrollbarWidth = 16f;
     const float Padding = 4f;
 
-    [MenuItem("奶茶店/交互界面/给选中容器加垂直滚动视图", false, 81)]
+    [MenuItem("奶茶店/归档/交互界面/给选中容器加垂直滚动视图", false, 81)]
     static void Setup()
     {
         GameObject root = Selection.activeGameObject;
@@ -99,7 +99,7 @@ public static class ScrollViewSetupTool
                   $"往 Content 里加物品即可自动撑高滚动。记得 Ctrl+S 保存场景。");
     }
 
-    [MenuItem("奶茶店/交互界面/给选中容器加垂直滚动视图", true)]
+    [MenuItem("奶茶店/归档/交互界面/给选中容器加垂直滚动视图", true)]
     static bool Validate()
     {
         GameObject go = Selection.activeGameObject;

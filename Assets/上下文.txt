@@ -53,7 +53,8 @@
   新预制件需自带 IceTray/MachineLevel/Animator/碰撞箱
 - machinePanelPrefab 需在 Main Camera 的 CupInteract 上拖入 预制件/奶茶机交互界面.prefab
 - 商店界面 Content 还是空的，商品条目待填
-- 摆放/穿模：Socket 方案只有文档，组件与编辑器工具未实现（见《摆放与穿模规范》）
+- 摆放/穿模：Socket 组件、吸附/校验菜单、自检已实现；**场景还没补 Socket**，
+  下一步给奶茶机/加热机/前台/货架加挂点并接 PlacementService（见《摆放与穿模规范》§8）
 
 【历史经验教训】
 1. 场景中文 YAML 存 \uXXXX，grep 搜不到，要 python unicode_escape 解码
@@ -87,6 +88,8 @@
 - 2026-11-27 美术：扫描现有资产，产出《美术风格》《美术产线方案》《2D美术Agent》；
   新增图标生成与减面工具（Tools/Art2D、Tools/3D）
 - 2026-11-27 文档：新增《脚本接口》《数据手册》《团队架构》《文档导航》《摆放与穿模规范》
+- 2026-11-27 摆放：Socket/Mountable/PlacementService + 吸附/校验菜单 + 自检 8 项全过；
+  场景搭建改为吸附生成（地板共享边、墙贴边下沉 1cm）；编辑器菜单收敛为 5 组，低频工具进「归档」
 - 2026-11-27 3D：本地 TripoSR 跑通（CPU 约 15 s/个，只出白模），详见《3D资产管线》§7；
   二次测试（金币/货架/奶茶机）结论：只适合圆润单件，设备与薄结构不可用，成果在 `模型测试/`
 - 2026-11-27 文案：文案 Agent + CSV 文案表 + GText 运行时 + TextImportTool 校验/生成 Key

@@ -10,7 +10,7 @@ using UnityEngine;
 public static class PlayViewBinder
 {
     const string PrefKey = "PlayViewBinder.Enabled";
-    const string MenuPath = "奶茶店/工具/运行时Scene跟随摄像机";
+    const string MenuPath = "奶茶店/归档/工具/运行时Scene跟随摄像机";
     static bool enabled = EditorPrefs.GetBool(PrefKey, true);
 
     static PlayViewBinder()

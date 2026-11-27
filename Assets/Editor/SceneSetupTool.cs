@@ -3,93 +3,163 @@ using UnityEngine.SceneManagement;
 using UnityEditor;
 
 /// <summary>
-/// 场景搭建工具：顶部菜单“奶茶店 → 场景搭建 → 创建地板 / 生成半地板 / 生成墙壁 / 生成半长墙 / 墙体高度加倍”。
-/// 约定：+Z 为前方，+X 为右方。
+/// 场景搭建：地板 / 墙壁 / 天花板。
+/// 所有生成都带**吸附**：地板拼到已有地板边缘、墙贴地板边且底部下沉 1cm，
+/// 生成后不需要再手调位置，也不会出现缝隙或共面闪烁。
+/// 约定：+Z 为前方，+X 为右方，网格 0.5m。
 /// </summary>
 public static class SceneSetupTool
 {
-    const float FloorSize = 10f;      // 地板边长
-    const float FloorThickness = 0.1f; // 地板厚度
-    const float FloorTopY = 0f;       // 地板上表面高度
-    const float WallLength = 10f;     // 墙壁长度（与地板边长一致）
-    const float WallHalfLength = 5f;  // 半长墙长度（与半地板短边一致）
-    const float WallHeight = 6f;      // 墙壁高度
-    const float WallThickness = 0.2f; // 墙壁厚度
+    public const float Grid = 0.5f;
+
+    public const float FloorSize = 10f;
+    public const float FloorThickness = 0.1f;
+    public const float FloorTopY = 0.05f;
+
+    public const float WallLength = 10f;
+    public const float WallHalfLength = 5f;
+    public const float WallHeight = 6f;
+    public const float WallThickness = 0.2f;
+
+    /// <summary>墙底沉入地板的深度：藏在内部，既无缝隙也不会共面闪烁</summary>
+    public const float WallSink = 0.01f;
+
+    // ---------------- 地板 ----------------
 
     [MenuItem("奶茶店/场景搭建/创建地板", false, 1)]
     public static void CreateFloor()
     {
-        Material floorMat = EnsureMaterial("地板_米黄", new Color(239f / 255f, 228f / 255f, 176f / 255f), 0f, 0.15f);
-
-        // 10×10 地板，生成在场景中心，上表面 y=0，可手动拖动拼接
-        CreateFloorPiece("地板", new Vector3(FloorSize, FloorThickness, FloorSize), floorMat);
+        CreateFloorPiece("地板", FloorSize, FloorSize);
     }
 
     [MenuItem("奶茶店/场景搭建/生成半地板（10×5）", false, 2)]
     public static void CreateHalfFloor10x5()
     {
-        Material floorMat = EnsureMaterial("地板_米黄", new Color(239f / 255f, 228f / 255f, 176f / 255f), 0f, 0.15f);
-
-        // 10×5 半地板（X 向 10、Z 向 5），其余与整块地板一致
-        CreateFloorPiece("半地板（10×5）", new Vector3(FloorSize, FloorThickness, FloorSize / 2f), floorMat);
+        CreateFloorPiece("半地板（10×5）", FloorSize, FloorSize / 2f);
     }
 
     [MenuItem("奶茶店/场景搭建/生成半地板（5×10）", false, 3)]
     public static void CreateHalfFloor5x10()
     {
-        Material floorMat = EnsureMaterial("地板_米黄", new Color(239f / 255f, 228f / 255f, 176f / 255f), 0f, 0.15f);
-
-        // 5×10 半地板（X 向 5、Z 向 10），其余与整块地板一致
-        CreateFloorPiece("半地板（5×10）", new Vector3(FloorSize / 2f, FloorThickness, FloorSize), floorMat);
-    }
-
-    /// <summary>生成一块地板：scale 决定长宽高，生成在场景中心、上表面 y=0，可手动拖动拼接</summary>
-    static void CreateFloorPiece(string name, Vector3 scale, Material mat)
-    {
-        var floor = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        floor.name = name;
-        floor.transform.localScale = scale;
-        floor.transform.position = new Vector3(0f, FloorTopY - scale.y * 0.5f, 0f);
-        floor.GetComponent<Renderer>().sharedMaterial = mat;
-        Undo.RegisterCreatedObjectUndo(floor, "生成地板");
-        Debug.Log($"[SceneSetupTool] 已生成 {name}（{scale.x}×{scale.z}，上表面 y={FloorTopY}）");
-    }
-
-    [MenuItem("奶茶店/场景搭建/生成墙壁", false, 4)]
-    public static void CreateWall()
-    {
-        Material wallMat = EnsureMaterial("墙壁_白", new Color(245f / 255f, 245f / 255f, 240f / 255f), 0f, 0.2f);
-
-        // 10×6×0.2 墙壁，生成在场景中心，底部 y=0，可手动拖动/旋转拼接
-        CreateWallPiece("墙壁", WallLength, wallMat);
-    }
-
-    [MenuItem("奶茶店/场景搭建/生成半长墙（5×6）", false, 5)]
-    public static void CreateHalfWall()
-    {
-        Material wallMat = EnsureMaterial("墙壁_白", new Color(245f / 255f, 245f / 255f, 240f / 255f), 0f, 0.2f);
-
-        // 5×6×0.2 半长墙，长度适配半地板（10×5 / 5×10）的短边
-        CreateWallPiece("半长墙（5×6）", WallHalfLength, wallMat);
-    }
-
-    /// <summary>生成一面墙：length 为长度，高度厚度固定；生成在场景中心，底部 y=0，可手动拖动/旋转拼接</summary>
-    static void CreateWallPiece(string name, float length, Material mat)
-    {
-        var wall = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        wall.name = name;
-        wall.transform.localScale = new Vector3(length, WallHeight, WallThickness);
-        wall.transform.position = new Vector3(0f, WallHeight / 2f, 0f);
-        wall.GetComponent<Renderer>().sharedMaterial = mat;
-        Undo.RegisterCreatedObjectUndo(wall, "生成墙壁");
-        Debug.Log($"[SceneSetupTool] 已生成 {name}（{length}×{WallHeight}×{WallThickness}，底部 y=0）");
+        CreateFloorPiece("半地板（5×10）", FloorSize / 2f, FloorSize);
     }
 
     /// <summary>
-    /// 把场景中所有墙体（名字以“墙壁”或“半长墙”开头）高度加高一倍：
-    /// 缩放 Y 翻倍，并同步调整位置让墙的底边保持在原高度，不会陷入地板。
-    /// 支持 Ctrl+Z 撤销。
+    /// 生成一块地板。若当前选中的是地板，则**沿它的 +X 边精确拼接**（共享边，不重叠不留缝）；
+    /// 否则放在原点。XZ 位置吸附到 0.5m 网格，上表面固定在 FloorTopY。
     /// </summary>
+    public static GameObject CreateFloorPiece(string name, float sizeX, float sizeZ)
+    {
+        Material floorMat = EnsureMaterial("地板_米黄",
+            new Color(239f / 255f, 228f / 255f, 176f / 255f), 0f, 0.15f);
+
+        var floor = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        floor.name = name;
+        floor.transform.localScale = new Vector3(sizeX, FloorThickness, sizeZ);
+
+        Vector3 pos = Vector3.zero;
+        GameObject anchor = Selection.activeGameObject;
+        if (anchor != null && IsFloor(anchor))
+        {
+            Bounds ab = PlacementService.GetBounds(anchor);
+            pos.x = ab.max.x + sizeX * 0.5f;
+            pos.z = ab.center.z;
+        }
+
+        pos.x = Snap(pos.x);
+        pos.z = Snap(pos.z);
+        pos.y = FloorTopY - FloorThickness * 0.5f;
+        floor.transform.position = pos;
+
+        floor.GetComponent<Renderer>().sharedMaterial = floorMat;
+        Undo.RegisterCreatedObjectUndo(floor, "生成地板");
+        Selection.activeGameObject = floor;
+
+        Debug.Log(string.Format("[SceneSetupTool] 生成 {0}（{1}×{2}），上表面 y={3}，位置 {4}",
+            name, sizeX, sizeZ, FloorTopY, pos));
+        return floor;
+    }
+
+    // ---------------- 墙壁 ----------------
+
+    [MenuItem("奶茶店/场景搭建/生成墙壁（吸附地板边）", false, 4)]
+    public static void CreateWall()
+    {
+        CreateWallAuto(WallLength);
+    }
+
+    [MenuItem("奶茶店/场景搭建/生成半长墙（吸附地板边）", false, 5)]
+    public static void CreateWallAutoMenu()
+    {
+        CreateWallAuto(WallHalfLength);
+    }
+
+    /// <summary>自动选最近的地板与最近的一条边，生成墙</summary>
+    public static GameObject CreateWallAuto(float length)
+    {
+        GameObject floor = FindFloorForWall();
+        if (floor == null)
+        {
+            Debug.LogWarning("[SceneSetupTool] 场景里没有地板，先创建地板再生成墙");
+            return null;
+        }
+
+        Vector3 pivot = SceneView.lastActiveSceneView != null
+            ? SceneView.lastActiveSceneView.pivot
+            : PlacementService.GetBounds(floor).center + Vector3.forward * 5f;
+
+        Vector3 outward;
+        float along;
+        PickEdge(PlacementService.GetBounds(floor), pivot, out outward, out along);
+        return CreateWallOnFloor(floor, length, outward, along);
+    }
+
+    /// <summary>
+    /// 在指定地板的指定边生成墙。墙的内侧面与地板边平齐，底部下沉 WallSink，
+    /// 长度沿边吸附到 0.5m 网格并居中于 alongOffset。
+    /// </summary>
+    public static GameObject CreateWallOnFloor(GameObject floor, float length, Vector3 outward, float alongOffset = 0f)
+    {
+        Material wallMat = EnsureMaterial("墙壁_白",
+            new Color(245f / 255f, 245f / 255f, 240f / 255f), 0f, 0.2f);
+
+        Bounds fb = PlacementService.GetBounds(floor);
+        outward.y = 0f;
+        if (outward.sqrMagnitude < 1e-6f) outward = Vector3.forward;
+        outward.Normalize();
+
+        Vector3 alongDir = Vector3.Cross(Vector3.up, outward).normalized;
+        float halfOut = Mathf.Abs(outward.x) * fb.extents.x + Mathf.Abs(outward.z) * fb.extents.z;
+        float halfLen = Mathf.Abs(alongDir.x) * fb.extents.x + Mathf.Abs(alongDir.z) * fb.extents.z;
+
+        length = Mathf.Clamp(length, Grid, halfLen * 2f);
+        float maxT = Mathf.Max(0f, halfLen - length * 0.5f);
+        float t = Mathf.Clamp(alongOffset, -maxT, maxT);
+        t = Snap(t);
+
+        Vector3 edgeCenter = fb.center + outward * halfOut;
+        Vector3 pos = edgeCenter + alongDir * t + outward * (WallThickness * 0.5f);
+
+        float bottom = fb.max.y - WallSink;
+        pos.y = bottom + WallHeight * 0.5f;
+
+        var wall = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        wall.name = length >= WallLength - 0.01f ? "墙壁" : "半长墙（5×6）";
+        wall.transform.localScale = new Vector3(length, WallHeight, WallThickness);
+        wall.transform.position = pos;
+        wall.transform.rotation = Quaternion.LookRotation(outward, Vector3.up);
+        wall.GetComponent<Renderer>().sharedMaterial = wallMat;
+
+        Undo.RegisterCreatedObjectUndo(wall, "生成墙壁");
+        Selection.activeGameObject = wall;
+
+        Debug.Log(string.Format("[SceneSetupTool] 生成 {0}，长 {1}，贴在地板边（内侧面 z={2:0.###}，底部 y={3:0.###}，下沉 {4}m）",
+            wall.name, length, Vector3.Dot(edgeCenter, outward), bottom, WallSink));
+        return wall;
+    }
+
+    // ---------------- 墙体高度 ----------------
+
     [MenuItem("奶茶店/场景搭建/墙体高度加倍", false, 6)]
     public static void DoubleWallHeight()
     {
@@ -100,7 +170,6 @@ public static class SceneSetupTool
             {
                 if (!t.name.StartsWith("墙壁") && !t.name.StartsWith("半长墙")) continue;
 
-                // 底边世界高度 = 中心 - 世界高度的一半（父级缩放为 1 时成立）
                 float bottom = t.position.y - t.lossyScale.y * 0.5f;
 
                 Undo.RecordObject(t, "墙体高度加倍");
@@ -108,12 +177,75 @@ public static class SceneSetupTool
                 scale.y *= 2f;
                 t.localScale = scale;
                 t.position = new Vector3(t.position.x, bottom + t.lossyScale.y * 0.5f, t.position.z);
-
                 count++;
             }
         }
 
-        Debug.Log($"[SceneSetupTool] 墙体高度已加倍：共处理 {count} 面墙（底边保持不变）。");
+        Debug.Log(string.Format("[SceneSetupTool] 墙体高度已加倍：共处理 {0} 面墙（底边不变）", count));
+    }
+
+    // ---------------- 工具方法 ----------------
+
+    public static float Snap(float v)
+    {
+        return Mathf.Round(v / Grid) * Grid;
+    }
+
+    public static bool IsFloor(GameObject go)
+    {
+        return go != null && (go.name.StartsWith("地板") || go.name.StartsWith("半地板"));
+    }
+
+    static GameObject FindFloorForWall()
+    {
+        if (Selection.activeGameObject != null && IsFloor(Selection.activeGameObject))
+            return Selection.activeGameObject;
+
+        Vector3 pivot = SceneView.lastActiveSceneView != null
+            ? SceneView.lastActiveSceneView.pivot
+            : Vector3.zero;
+
+        GameObject best = null;
+        float bestDist = float.MaxValue;
+        foreach (GameObject root in SceneManager.GetActiveScene().GetRootGameObjects())
+        {
+            foreach (Transform t in root.GetComponentsInChildren<Transform>())
+            {
+                if (!IsFloor(t.gameObject)) continue;
+                float d = Vector3.Distance(pivot, t.position);
+                if (d < bestDist) { bestDist = d; best = t.gameObject; }
+            }
+        }
+        return best;
+    }
+
+    /// <summary>在包围盒四条边里，选离 pivot 最近的一条；输出朝外方向与沿边偏移</summary>
+    static void PickEdge(Bounds b, Vector3 p, out Vector3 outward, out float alongOffset)
+    {
+        Vector3[] dirs = { Vector3.forward, Vector3.back, Vector3.right, Vector3.left };
+        float best = float.MaxValue;
+        outward = Vector3.forward;
+        alongOffset = 0f;
+
+        foreach (Vector3 dir in dirs)
+        {
+            Vector3 alongDir = Vector3.Cross(Vector3.up, dir).normalized;
+            float halfOut = Mathf.Abs(dir.x) * b.extents.x + Mathf.Abs(dir.z) * b.extents.z;
+            float halfLen = Mathf.Abs(alongDir.x) * b.extents.x + Mathf.Abs(alongDir.z) * b.extents.z;
+
+            Vector3 edgeCenter = b.center + dir * halfOut;
+            float t = Vector3.Dot(p - edgeCenter, alongDir);
+            t = Mathf.Clamp(t, -halfLen, halfLen);
+            Vector3 nearest = edgeCenter + alongDir * t;
+            float d = Vector3.Distance(p, nearest);
+
+            if (d < best)
+            {
+                best = d;
+                outward = dir;
+                alongOffset = t;
+            }
+        }
     }
 
     /// <summary>创建（或更新）一个 Standard 材质，存到 Assets/材料 下</summary>
@@ -122,8 +254,8 @@ public static class SceneSetupTool
         if (!AssetDatabase.IsValidFolder("Assets/材料"))
             AssetDatabase.CreateFolder("Assets", "材料");
 
-        string path = $"Assets/材料/{name}.mat";
-        var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+        string path = string.Format("Assets/材料/{0}.mat", name);
+        Material mat = AssetDatabase.LoadAssetAtPath<Material>(path);
         if (mat == null)
         {
             mat = new Material(Shader.Find("Standard"));
@@ -131,7 +263,7 @@ public static class SceneSetupTool
         }
         mat.color = color;
         mat.SetFloat("_Metallic", metallic);
-        mat.SetFloat("_Glossiness", smoothness); // 越低越哑光
+        mat.SetFloat("_Glossiness", smoothness);
         EditorUtility.SetDirty(mat);
         AssetDatabase.SaveAssets();
         return mat;

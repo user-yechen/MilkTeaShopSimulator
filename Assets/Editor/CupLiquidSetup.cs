@@ -23,7 +23,7 @@ public static class CupLiquidSetup
 
     // ===== 给选中物体加液体 =====
 
-    [MenuItem("奶茶店/杯子/液位/给选中物体加液体", false, 23)]
+    [MenuItem("奶茶店/归档/杯子/液位/给选中物体加液体", false, 23)]
     static void AddLiquidToSelection()
     {
         GameObject go = Selection.activeGameObject;
@@ -38,7 +38,7 @@ public static class CupLiquidSetup
 
     // ===== 给所有奶茶杯 Prefab 加液体 =====
 
-    [MenuItem("奶茶店/杯子/液位/给所有奶茶杯加液体", false, 24)]
+    [MenuItem("奶茶店/归档/杯子/液位/给所有奶茶杯加液体", false, 24)]
     static void AddLiquidToAllCupPrefabs()
     {
         bool anyModified = false;

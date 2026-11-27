@@ -11,7 +11,7 @@ public static class MilkTeaMaterialSetup
     const string MatFolder = "Assets/Resources/材料";
     const string MatPath = "Assets/Resources/材料/奶茶液.mat";
 
-    [MenuItem("奶茶店/材质/创建奶茶液材质并赋值", false, 40)]
+    [MenuItem("奶茶店/归档/材质/创建奶茶液材质并赋值", false, 40)]
     public static void CreateAndAssign()
     {
         // 1. 创建 Particles/Standard Unlit 材质

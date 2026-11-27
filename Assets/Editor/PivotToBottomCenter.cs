@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>将选中 GameObject（或 Prefab）的 pivot 移到底边几何中心</summary>
 public static class PivotToBottomCenter
 {
-    [MenuItem("奶茶店/杯子/选中物体：Pivot 移到底边中心", false, 22)]
+    [MenuItem("奶茶店/归档/杯子/选中物体：Pivot 移到底边中心", false, 22)]
     static void MovePivotToBottomCenter()
     {
         var selection = Selection.gameObjects;
@@ -18,7 +18,7 @@ public static class PivotToBottomCenter
         Debug.Log($"[Pivot] 完成 {done}/{selection.Length} 个物体");
     }
 
-    [MenuItem("奶茶店/杯子/选中物体：Pivot 移到底边中心", true)]
+    [MenuItem("奶茶店/归档/杯子/选中物体：Pivot 移到底边中心", true)]
     static bool Validate() => Selection.gameObjects.Length > 0;
 
     /// <summary>核心逻辑：计算 bounds，把所有子物体的 localPosition 偏移，使得根节点落在底边中心</summary>

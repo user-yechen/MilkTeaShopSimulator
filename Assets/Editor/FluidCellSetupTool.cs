@@ -10,7 +10,7 @@ public static class FluidCellSetupTool
 {
     const string PrefabPath = "Assets/预制件/奶茶机交互界面.prefab";
 
-    [MenuItem("奶茶店/交互界面/给流体格子加点击脚本", false, 80)]
+    [MenuItem("奶茶店/归档/交互界面/给流体格子加点击脚本", false, 80)]
     static void Setup()
     {
         GameObject root = PrefabUtility.LoadPrefabContents(PrefabPath);
