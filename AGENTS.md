@@ -16,6 +16,7 @@
    - 3D 模型生产 → `文档/06-Agents/3D模型Agent.md`（Tripo 2D→3D）
    - 文案 / 文本 → `文档/06-Agents/文案Agent.md`、`Assets/Resources/文案/文案表.csv`
    - 音乐 / BGM → `文档/06-Agents/音乐Agent.md`、`Tools/Music/`
+   - 素材学习 → `训练素材/README.md`（音乐 / 文案 / 图像，归纳写回各目录）
    - 摆放 / 穿模 → `文档/02-规范/摆放与穿模规范.md`
    - 3D 生成原理 / 本地 TripoSR → `文档/05-3D/3D资产管线-Tripo.md`
 4. **用 3–5 条 bullet 向用户复述**：

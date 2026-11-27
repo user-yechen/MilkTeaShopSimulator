@@ -1,0 +1,21 @@
+{
+  "root": "训练素材",
+  "categories": {
+    "音乐": {
+      "count": 0,
+      "total_mb": 0.0,
+      "items": []
+    },
+    "文案": {
+      "count": 0,
+      "total_mb": 0.0,
+      "items": []
+    },
+    "图像": {
+      "count": 0,
+      "total_mb": 0.0,
+      "items": []
+    }
+  },
+  "duplicates": []
+}
