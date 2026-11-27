@@ -144,7 +144,7 @@ npx -y tripo-cli make ArtSource\2D\concepts\珍珠.png `
 > 用 3D 模型 Agent 按 spec 生成「珍珠」，Tripo P1 + face_limit 200，出 GLB 和三视角预览。
 
 ```
-你是 3D 模型 Agent。先读 Docs/ArtSource/3D/specs/<id>.json、Docs/美术风格.md 与本文。
+你是 3D 模型 Agent。先读 Docs/ArtSource/3D/specs/<id>.json、Docs/02-规范/美术风格.md 与本文。
 任务：按 spec 生成 <资产名>。
 要求：
 1) 参考图用 3/4 白底 1024；

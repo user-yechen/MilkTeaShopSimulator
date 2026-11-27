@@ -1,7 +1,7 @@
 # 文案 Agent 手册
 
 > 2026-11-27　｜　负责游戏内所有文本：润色、拆分条目、产出可导入 Unity 的文案表
-> 配套：[数据手册.md](../数据手册.md)、[团队架构.md](../团队架构.md)
+> 配套：[数据手册.md](../03-数据/数据手册.md)、[团队架构.md](../04-团队/团队架构.md)
 
 ---
 
@@ -120,7 +120,7 @@ tutorial.step.pick_cup
 子 Agent 提示词：
 
 ```
-你是文案 Agent。先读 Docs/Agents/文案Agent.md 与 Assets/Resources/文案/文案表.csv。
+你是文案 Agent。先读 Docs/06-Agents/文案Agent.md 与 Assets/Resources/文案/文案表.csv。
 任务：把 <大纲路径> 润色并拆成条目，写入 CSV（保留已有 key，新增 key 按规范）。
 要求：口语、短句、全角标点、控制 maxChars；不改代码、不改数值。
 完成后跑 TextImportTool 校验，报告新增/修改的 key 与校验结果。
