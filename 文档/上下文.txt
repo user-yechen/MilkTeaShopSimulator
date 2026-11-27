@@ -29,6 +29,7 @@
 | 文案 / 文本表 / key 规范 | 文档/06-Agents/文案Agent.md、Assets/Resources/文案/文案表.csv |
 | 音乐 / BGM / 音频规范 | 文档/06-Agents/音乐Agent.md、Tools/Music/ |
 | 给 Agent 的参考素材 | 训练素材/README.md（音乐 / 文案 / 图像） |
+| AI 生成的 2D 资产 / ComfyUI | 训练成果/README.md、Tools/ComfyUI/ |
 | 3D 生成（Tripo 云 / 本地 TripoSR） | 文档/05-3D/3D资产管线-Tripo.md |
 | 物件摆放 / 穿模怎么解决 | 文档/02-规范/摆放与穿模规范.md |
 | 角色 / 流程 / 交接 / RACI | 文档/04-团队/团队架构.md |
@@ -101,6 +102,8 @@
   已出 day_loop / night_loop 两首 16 小节循环，待 DAW 挂音源试听混音
 - 2026-11-27 训练素材：新建 训练素材/{音乐,文案,图像} + 归纳模板 + scan_materials.py；
   素材给对应 Agent 学习，归纳写回各目录 归纳.md，媒体文件不入 git
+- 2026-11-27 训练成果：新建 训练成果/图像/{设备,UI,图标}；接入本地 ComfyUI（8188），
+  Tools/ComfyUI/generate.py 支持文生图与图生图；已出加热机概念图 3 版
 - 2026-11-09 玩法：商店购买、摇杆位置自定义、冰格等级解锁、尺寸测量与升级换模缩放
 - 历史细节看 git log 与各文档，不再堆在这里
 
