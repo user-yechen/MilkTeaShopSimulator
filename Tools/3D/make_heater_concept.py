@@ -80,9 +80,9 @@ PIPE = mat("pipe", (0.16, 0.16, 0.18), metallic=0.6, rough=0.4)
 # 机身（前面板下方挖出内凹的放杯空间）
 body = cube("body", (0, 0, 0.25), (0.30, 0.34, 0.50), STEEL, bevel=0.008)
 
-bpy.ops.mesh.primitive_cube_add(size=1, location=(0, -0.11, 0.265))
+bpy.ops.mesh.primitive_cube_add(size=1, location=(0, -0.11, 0.20))
 cutter = bpy.context.object
-cutter.scale = (0.24, 0.12, 0.21)
+cutter.scale = (0.24, 0.12, 0.32)
 bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
 mod = body.modifiers.new("cut", "BOOLEAN")
 mod.object = cutter
@@ -103,28 +103,28 @@ for i in range(5):
     cyl("btn_%d" % i, (x, -0.214, 0.405), 0.0075, 0.007, DARK,
         rot=(math.radians(80), 0, 0), verts=16)
 
-# 蒸汽杆：垂直下 → 向外折一次 → 保持方向垂下（伸进内凹区）
+# 蒸汽杆：垂直下 → 向外折一次 → 保持方向垂下；杆端与接水盘留出垂直间距
 for side, x in ((-1, -0.070), (1, 0.070)):
     cyl("handle_%d" % side, (x, -0.205, 0.372), 0.014, 0.034, RED,
         rot=(math.radians(80), 0, 0), verts=20)
-    cyl("wand_top_%d" % side, (x, -0.200, 0.355), 0.012, 0.030, PIPE,
+    cyl("wand_top_%d" % side, (x, -0.200, 0.350), 0.012, 0.035, PIPE,
         rot=(0, 0, 0), verts=16)
-    cyl("wand_elbow_%d" % side, (x, -0.220, 0.320), 0.012, 0.060, PIPE,
+    cyl("wand_elbow_%d" % side, (x, -0.220, 0.322), 0.012, 0.060, PIPE,
         rot=(math.radians(-45), 0, 0), verts=16)
-    cyl("wand_dn_%d" % side, (x, -0.240, 0.235), 0.012, 0.130, PIPE,
+    cyl("wand_dn_%d" % side, (x, -0.240, 0.300), 0.012, 0.060, PIPE,
         rot=(0, 0, 0), verts=16)
-    cyl("nozzle_%d" % side, (x, -0.240, 0.172), 0.006, 0.025, PIPE,
+    cyl("nozzle_%d" % side, (x, -0.240, 0.262), 0.006, 0.025, PIPE,
         rot=(0, 0, 0), verts=12)
 
-# 接水盘（内凹区底面，前沿略突出）
-cube("tray_base", (0, -0.135, 0.170), (0.26, 0.14, 0.022), TRAY, bevel=0.003)
-cube("tray_top", (0, -0.135, 0.182), (0.24, 0.12, 0.005), DARK, bevel=0.001)
+# 接水盘：底面与机器底部平齐（z=0），上表面留出放杯高度
+cube("tray_base", (0, -0.135, 0.020), (0.28, 0.15, 0.040), TRAY, bevel=0.003)
+cube("tray_top", (0, -0.135, 0.042), (0.26, 0.13, 0.005), DARK, bevel=0.001)
 
-# 支脚
-for sx in (-1, 1):
-    for sy in (-1, 1):
-        cyl("foot_%d_%d" % (sx, sy), (sx * 0.12, sy * 0.13, 0.012), 0.012, 0.024,
-            DARK, verts=16)
+# 支脚（取消：底部与置物台平齐，侧视呈「工」字下半横）
+# for sx in (-1, 1):
+#     for sy in (-1, 1):
+#         cyl("foot_%d_%d" % (sx, sy), (sx * 0.12, sy * 0.13, 0.012), 0.012, 0.024,
+#             DARK, verts=16)
 
 # 侧面提手
 cube("side_handle", (0.152, 0.02, 0.40), (0.012, 0.10, 0.028), DARK, bevel=0.003)
