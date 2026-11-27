@@ -75,6 +75,7 @@ RED = mat("red", (0.70, 0.05, 0.05), metallic=0.1, rough=0.45)
 SCREEN = mat("screen", (0.05, 0.25, 0.3), metallic=0.0, rough=0.2,
              emission=(0.1, 0.7, 0.8))
 TRAY = mat("tray", (0.06, 0.06, 0.065), metallic=0.4, rough=0.5)
+PIPE = mat("pipe", (0.16, 0.16, 0.18), metallic=0.6, rough=0.4)
 
 # 机身
 cube("body", (0, 0, 0.25), (0.30, 0.34, 0.50), STEEL, bevel=0.008)
@@ -95,12 +96,10 @@ for i in range(5):
 for side, x in ((-1, -0.070), (1, 0.070)):
     cyl("handle_%d" % side, (x, -0.180, 0.372), 0.014, 0.034, RED,
         rot=(math.radians(80), 0, 0), verts=20)
-    cyl("wand_up_%d" % side, (x, -0.196, 0.315), 0.011, 0.090, STEEL,
-        rot=(math.radians(18), 0, 0), verts=16)
-    cyl("wand_dn_%d" % side, (x, -0.212, 0.235), 0.010, 0.120, STEEL,
-        rot=(math.radians(3), 0, 0), verts=16)
-    cyl("nozzle_%d" % side, (x, -0.214, 0.175), 0.005, 0.022, STEEL,
-        rot=(math.radians(3), 0, 0), verts=12)
+    cyl("wand_%d" % side, (x, -0.196, 0.265), 0.012, 0.200, PIPE,
+        rot=(math.radians(6), 0, 0), verts=16)
+    cyl("nozzle_%d" % side, (x, -0.199, 0.160), 0.006, 0.026, PIPE,
+        rot=(math.radians(6), 0, 0), verts=12)
 
 # 接水盘
 cube("tray_base", (0, -0.085, 0.030), (0.30, 0.20, 0.040), TRAY, bevel=0.003)
