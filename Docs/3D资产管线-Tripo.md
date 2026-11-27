@@ -254,3 +254,14 @@ D:\Tools\triposr-env\Scripts\python.exe run.py D:\Tools\triposr-input\coin_white
 设备/货架这类有薄板和内部结构的，走 **Tripo 云 P1 + face_limit** 或 Blender 参数化建模。
 完整对比与复现命令见 `模型测试/README.md`。
 
+### 7.7 全量批量：15 个模型的结论（2026-11-27）
+
+把 `Assets/模型` 下 **15 个 GLB** 全部跑了一遍（256 分辨率、减面 3,000）：
+
+- **只有 2 个勉强可辨**：奶茶杯_大 / 奶茶杯_中（回转体、轮廓清晰）
+- 其余 13 个全部失败：设备成团块、长条家具退化成细条、货架薄板碎裂
+- 结论与 7.6 一致：**TripoSR 不适合本项目的设备与家具**，不要再投入时间调参
+
+成果与逐项评价：`模型测试/全部模型/README.md`、`总览.png`。
+批量脚本：`D:\Tools\batch_tripo.ps1`（改 `$src` 可换目录）。
+

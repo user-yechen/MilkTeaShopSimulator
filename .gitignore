@@ -51,4 +51,5 @@ desktop.ini
 
 # Tripo / Blender 原始输出（体积大，不入库）
 ArtSource/3D/raw/
+模型测试/**/raw/
 
