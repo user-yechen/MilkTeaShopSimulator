@@ -1,0 +1,21 @@
+key,category,zh,en,speaker,maxChars,note
+ui.shop.title,UI,商店,,,8,左上角图标名
+ui.settings.title,UI,设置,,,8,左上角图标名
+ui.map.title,UI,地图,,,8,左上角图标名
+ui.tip.coming_soon,提示,功能未开放,,,12,未接通入口的提示
+ui.day.end_title,UI,今日营业结束,,,10,打烊面板标题
+ui.day.end_body,UI,今日营收：{0} 元\n钱包：{1} 元,,,40,打烊面板正文
+ui.revenue.label,UI,今日营收：,,,10,营收面板标签
+ui.wallet.label,UI,金币,,,6,钱包图标旁
+ui.button.close,UI,关闭,,,4,面板关闭
+ui.button.confirm,UI,确定,,,4,通用确认
+ui.button.cancel,UI,取消,,,4,通用取消
+ui.joystick.confirm,UI,确定位置,,,8,摇杆调整
+ui.joystick.reset,UI,重置默认,,,8,摇杆调整
+ui.title.custom_joystick,UI,自定义摇杆位置,,,10,设置界面按钮
+ui.quit,UI,退出游戏,,,8,设置界面按钮
+cup.medium,系统,中杯,,,4,杯型
+cup.large,系统,大杯,,,4,杯型
+fluid.milk,系统,牛奶,,,4,液体名
+fluid.tea,系统,茶,,,4,液体名
+tip.fluid.not_enough,提示,{0} 不足,,,12,注液量不足
