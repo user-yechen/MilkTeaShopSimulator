@@ -309,3 +309,8 @@
    （Tripo 支持 DSH 插件/CLI/MCP，`tripo login` 浏览器授权无需 API Key；`make --for game-mobile -p face_limit=1500` 实测有效）。
    新增工具：Tools/Art2D/make_ui_icon.py（金币/齿轮/星标已出图，三态）、Tools/3D/decimate_to_budget.py（奶茶机 624→400 面实测通过）；
    ArtSource/ 存放不参与 Unity 导入的源文件（2D 源图、3D raw/final、spec）。
+
+㊽ 2026-11-27 · 脚本接口文档：新建 **Docs/脚本接口.md**（此前项目没有接口文档，TraeCN 只留了上下文索引）。从源码自动提取 + 人工整理，
+   覆盖 Assets/脚本 33 个运行时脚本、44 个类/结构体条目、311 个公开成员；含 6 组关键调用链（取杯→注液→加热→上台、顾客交付、打烊、
+   存档、商店升级）、AutoAttach 清单、调用关系与「改接口影响面速查」、Editor 菜单入口附录。
+   约定：新增交互按钮走 CupInteract.AddSharedButton；新设备实现 IsNear/PlaceCup/TakeCup 三件套；改 public 签名后同步更新本文。
