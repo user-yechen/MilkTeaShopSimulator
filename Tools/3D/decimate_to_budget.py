@@ -26,7 +26,8 @@ def main():
     if ext in (".glb", ".gltf"):
         bpy.ops.import_scene.gltf(filepath=src)
     elif ext == ".obj":
-        bpy.ops.wm.obj_import(filepath=src)
+        # TripoSR 的 OBJ 是 Z-up，Blender 默认按 Y-up 导入会躺倒
+        bpy.ops.wm.obj_import(filepath=src, forward_axis='Y', up_axis='Z')
     elif ext == ".fbx":
         bpy.ops.import_scene.fbx(filepath=src)
     else:
