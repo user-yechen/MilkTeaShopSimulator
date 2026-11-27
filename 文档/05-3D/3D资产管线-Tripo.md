@@ -245,7 +245,7 @@ D:\Tools\triposr-env\Scripts\python.exe run.py <输入图> `
 5. **权重放本地**：`--pretrained-model-name-or-path` 指向本地目录，配合 `HF_HUB_OFFLINE=1` 避免联网卡住。
 6. **OBJ 是 Z-up**：用 Blender 导入必须 `up_axis='Z'`，否则模型躺倒（`decimate_to_budget.py` 已处理）。
 
-### 7.6 二次测试：3/4 渲染输入（2026-11-27，见 `模型测试/`）
+### 7.6 二次测试：3/4 渲染输入（2026-11-27，见 `../模型测试/`）
 
 用项目内模型渲染的 3/4 图当输入，结果**比预期差**：
 
@@ -259,7 +259,7 @@ D:\Tools\triposr-env\Scripts\python.exe run.py <输入图> `
 
 **定位调整**：TripoSR 只用于「圆润、单件、对称」的小物件起白模（珍珠、椰果、杯子）；
 设备/货架这类有薄板和内部结构的，走 **Tripo 云 P1 + face_limit** 或 Blender 参数化建模。
-完整对比与复现命令见 `模型测试/README.md`。
+完整对比与复现命令见 `../模型测试/README.md`。
 
 ### 7.7 全量批量：15 个模型的结论（2026-11-27）
 
@@ -269,6 +269,6 @@ D:\Tools\triposr-env\Scripts\python.exe run.py <输入图> `
 - 其余 13 个全部失败：设备成团块、长条家具退化成细条、货架薄板碎裂
 - 结论与 7.6 一致：**TripoSR 不适合本项目的设备与家具**，不要再投入时间调参
 
-成果与逐项评价：`模型测试/全部模型/README.md`、`总览.png`。
+成果与逐项评价：`../模型测试/全部模型/README.md`、`总览.png`。
 批量脚本：`D:\Tools\batch_tripo.ps1`（改 `$src` 可换目录）。
 

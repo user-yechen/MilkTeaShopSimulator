@@ -1,15 +1,15 @@
 ---
 name: context-maintainer
-description: Maintains Assets/上下文.txt project context file with script inventory scene facts recent 5 dialogs and TODOs. Use at the start of every new task in this project and again after functional work completes. Do not use for one-off chats unrelated to the project.
+description: Maintains 文档/上下文.txt project context file with script inventory scene facts recent 5 dialogs and TODOs. Use at the start of every new task in this project and again after functional work completes. Do not use for one-off chats unrelated to the project.
 ---
 
 # Context Maintainer
 
-为这个奶茶店 Unity 项目维护 `Assets/上下文.txt`——它是跨会话记忆全部项目状态的唯一来源。本 Skill 只有两个时机会被调用：新任务开始时读一次，功能完成后写回一次。
+为这个奶茶店 Unity 项目维护 `文档/上下文.txt`——它是跨会话记忆全部项目状态的唯一来源。本 Skill 只有两个时机会被调用：新任务开始时读一次，功能完成后写回一次。
 
 ## 触发条件
 
-每次接到这个项目上的新用户请求，第一件事就是**读** `Assets/上下文.txt`；每次完成了功能性工作（改了脚本、改了场景、加了新文件、解决了一个 bug）并验证通过后，最后一件事是**写回**该文件。
+每次接到这个项目上的新用户请求，第一件事就是**读** `文档/上下文.txt`；每次完成了功能性工作（改了脚本、改了场景、加了新文件、解决了一个 bug）并验证通过后，最后一件事是**写回**该文件。
 
 下面任何一种情况**不要**写回：
 - 跟奶茶店项目无关的闲聊或解释性回答
@@ -19,7 +19,7 @@ description: Maintains Assets/上下文.txt project context file with script inv
 
 ## 读取阶段（新任务开始）
 
-1. 用 Read 工具打开 `Assets/上下文.txt`。如果文件不存在或读取失败，向用户报告情况后跳过本 Skill 后续步骤，继续正常处理当前请求。
+1. 用 Read 工具打开 `文档/上下文.txt`。如果文件不存在或读取失败，向用户报告情况后跳过本 Skill 后续步骤，继续正常处理当前请求。
 2. 快速扫一遍四个关键区块，确认脑中的项目状态和文件一致：
    - **脚本功能索引** —— 16 个 .cs 文件各自做什么，有没有哪个脚本刚被改过但还没记录？
    - **场景关键事实** —— 地板拼接/Transform/fileID、奶茶机子节点、加热机子节点、路人 PrefabInstance，有没有用户新加的节点？
@@ -63,7 +63,7 @@ description: Maintains Assets/上下文.txt project context file with script inv
    - **格式**：
      ```
      【对话-⑤ 用户】提炼上下文，生成一个"上下文.txt"文件……
-       →（我）创建 Assets/上下文.txt，7 大区块结构约定……
+       →（我）创建 文档/上下文.txt，7 大区块结构约定……
      ```
 6. **整文件覆盖写**：用 Write 工具一次性写回，不要 Edit 中间某几段。这样能保证区块之间的相对顺序、分隔线格式不被破坏。
 7. 写完后不用再读回来验证（Write 工具本身就是原子操作），直接继续向用户汇报本次工作。

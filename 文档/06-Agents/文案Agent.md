@@ -20,7 +20,7 @@
 
 ## 2. 输入与输出
 
-- 输入：你在 `Docs/文案/大纲.md`（或直接贴在对话里）写的大纲/草稿
+- 输入：你在 `文档/文案/大纲.md`（或直接贴在对话里）写的大纲/草稿
 - 输出：
   1. `Assets/Resources/文案/文案表.csv`（覆盖写，保留旧 key）
   2. 一段「本次新增/修改了哪些 key」的说明
@@ -115,12 +115,12 @@ tutorial.step.pick_cup
 
 ## 7. 调用模板
 
-> 用文案 agent 把我 `Docs/文案/大纲.md` 里的大纲润色成文案表，按现有格式，跑校验，给我 key 变更说明。
+> 用文案 agent 把我 `文档/文案/大纲.md` 里的大纲润色成文案表，按现有格式，跑校验，给我 key 变更说明。
 
 子 Agent 提示词：
 
 ```
-你是文案 Agent。先读 Docs/06-Agents/文案Agent.md 与 Assets/Resources/文案/文案表.csv。
+你是文案 Agent。先读 文档/06-Agents/文案Agent.md 与 Assets/Resources/文案/文案表.csv。
 任务：把 <大纲路径> 润色并拆成条目，写入 CSV（保留已有 key，新增 key 按规范）。
 要求：口语、短句、全角标点、控制 maxChars；不改代码、不改数值。
 完成后跑 TextImportTool 校验，报告新增/修改的 key 与校验结果。

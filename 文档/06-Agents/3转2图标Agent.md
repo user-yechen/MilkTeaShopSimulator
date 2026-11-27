@@ -138,7 +138,7 @@
 子 Agent 提示词：
 
 ```
-你是 3转2 图标 Agent。先读 Docs/02-规范/美术风格.md 与 Docs/06-Agents/3转2图标Agent.md。
+你是 3转2 图标 Agent。先读 文档/02-规范/美术风格.md 与 文档/06-Agents/3转2图标Agent.md。
 任务：把 <模型路径> 渲成 512 透明 PNG，输出到 <路径>。
 要求：先用 Tools/Art2D/render_icon.py 渲染，再用 icon_post.py 后期；
 与 Assets/Resources/贴图/ 下现有图标并排比对，报告角度/比例/描边是否一致。

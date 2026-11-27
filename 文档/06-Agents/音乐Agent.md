@@ -130,7 +130,7 @@ pattern：`arp`（分解）、`block`（柱式）、`finger`（指弹）、`sust
 > 用音乐 Agent 写一首白天营业的 BGM，钢琴 + 木吉他 + 鼓 + Pad，96 BPM，16 小节循环。
 
 ```
-你是音乐 Agent。先读 Docs/06-Agents/音乐Agent.md。
+你是音乐 Agent。先读 文档/06-Agents/音乐Agent.md。
 任务：为 <场景> 写 <时长> 的循环 BGM，乐器用 <钢琴/木吉他/鼓/Pad>。
 要求：4/4、<BPM>、<调式>；先出 spec JSON，再跑 make_bgm.py 出 MIDI；
 给我 MIDI 路径、和弦进行、编曲说明、混音参数；不要改代码。
