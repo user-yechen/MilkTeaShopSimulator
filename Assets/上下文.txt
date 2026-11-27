@@ -25,6 +25,7 @@
 | 类与方法签名 / 调用链 / 影响面 / 实现坑 | Docs/脚本接口.md |
 | 风格 / 色板 / 面数预算 / UI 规范 | Docs/美术风格.md |
 | 美术怎么生产 / Agent 怎么分工 | Docs/美术产线方案.md、Docs/Agents/2D美术Agent.md、Docs/Agents/3转2图标Agent.md |
+| 3D 模型生产（Tripo 2D→3D） | Docs/Agents/3D模型Agent.md |
 | 文案 / 文本表 / key 规范 | Docs/Agents/文案Agent.md、Assets/Resources/文案/文案表.csv |
 | 3D 生成（Tripo 云 / 本地 TripoSR） | Docs/3D资产管线-Tripo.md |
 | 物件摆放 / 穿模怎么解决 | Docs/摆放与穿模规范.md |

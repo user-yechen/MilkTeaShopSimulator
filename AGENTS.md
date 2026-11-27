@@ -13,9 +13,10 @@
    - 数值 / 坐标 / 存档 / 构建 → `Docs/数据手册.md`
    - 接口 / 系统 / 调用关系 → `Docs/脚本接口.md`
    - 美术 / 图标 / 风格 → `Docs/美术风格.md`、`Docs/Agents/*.md`
+   - 3D 模型生产 → `Docs/Agents/3D模型Agent.md`（Tripo 2D→3D）
    - 文案 / 文本 → `Docs/Agents/文案Agent.md`、`Assets/Resources/文案/文案表.csv`
    - 摆放 / 穿模 → `Docs/摆放与穿模规范.md`
-   - 3D 生成 → `Docs/3D资产管线-Tripo.md`
+   - 3D 生成原理 / 本地 TripoSR → `Docs/3D资产管线-Tripo.md`
 4. **用 3–5 条 bullet 向用户复述**：
    - 现在能玩什么、卡在哪
    - 这次要改哪个模块、它依赖谁、谁依赖它
