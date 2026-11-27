@@ -183,13 +183,17 @@ Tripo 的商业模型不能本地部署；可本地跑的是它的开源版 **Tr
 | 项 | 版本 / 说明 |
 |---|---|
 | Python | 3.12（独立 venv：`D:\Tools\triposr-env`） |
-| PyTorch | 2.15.0+cpu（CUDA 轮子 2.4GB 下载停滞，先跑 CPU） |
+| GPU | RTX 4070 Laptop 8GB，驱动 596.36 |
+| PyTorch | **2.14.1+cu126（GPU）**；早期为 2.15.0+cpu（官方源下载停滞，临时用 CPU） |
 | transformers | 4.44.2 + tokenizers 0.19.1（4.35 在 Py3.12 上没有 tokenizers 预编译轮子） |
 | 其他 | rembg[cpu] 2.0.88、trimesh 4.0.5、scikit-image、xatlas 0.0.9、moderngl 5.10.0 |
 | 权重 | ModelScope `AI-ModelScope/TripoSR`：config.yaml + model.ckpt（1.6 GB） |
 | DINO 主干 | ModelScope `facebook/dino-vitb16`：config/preprocessor/pytorch_model.bin（327 MB） |
 
 > HuggingFace 直连超时、hf-mirror 的大文件 302 到被墙 CDN，所以全部走 ModelScope 下载。
+> PyTorch CUDA 轮子同理：`download.pytorch.org` 实测 ~8 KB/s，改用**上海交大镜像**
+> `https://mirror.sjtu.edu.cn/pytorch-wheels/cu126/`（实测 ~10 MB/s），下载后用
+> `pip install --no-deps` 装本地 whl。
 
 ### 7.2 源码补丁（3 处，均在 `D:\Tools\TripoSR`）
 
@@ -206,20 +210,23 @@ Tripo 的商业模型不能本地部署；可本地跑的是它的开源版 **Tr
 ```powershell
 cd D:\Tools\TripoSR
 $env:HF_HUB_OFFLINE='1'; $env:TRANSFORMERS_OFFLINE='1'
-D:\Tools\triposr-env\Scripts\python.exe run.py D:\Tools\triposr-input\coin_white.png `
-  --device cpu --pretrained-model-name-or-path D:\Tools\TripoSR\weights `
-  --output-dir D:\Tools\triposr-out --mc-resolution 192 --no-remove-bg
+D:\Tools\triposr-env\Scripts\python.exe run.py <输入图> `
+  --device cuda:0 --pretrained-model-name-or-path D:\Tools\TripoSR\weights `
+  --output-dir D:\Tools\triposr-out --mc-resolution 256 --no-remove-bg
 ```
 
-| 阶段 | 耗时（CPU / 192 分辨率） |
-|---|---:|
-| 加载模型 | 2.3 s |
-| 图像编码 + 三平面推理 | 6.2 s |
-| Marching Cubes 提网格 | 6.4 s |
-| 导出 OBJ | 0.2 s |
-| **合计** | **约 15 s** |
+| 阶段 | CPU / 192 | **GPU / 256** |
+|---|---:|---:|
+| 加载模型 | 2.3 s | 2.9 s（含 CUDA 初始化） |
+| 图像编码 + 三平面推理 | 6.2 s | **1.8 s** |
+| Marching Cubes 提网格 | 6.4 s | **1.75 s** |
+| 导出 OBJ | 0.2 s | 0.2–0.4 s |
+| **合计** | **约 15 s** | **约 6.8 s** |
 
-输出：`mesh.obj`，**97,606 三角面**，带顶点色，无 UV、无贴图。
+> 分辨率更高（256 vs 192）、总耗时反而减半。提网格仍走 CPU 的 skimage，但 256 下只要 1.75 s。
+> 批量 15 个模型：CPU 约 12 分钟 → GPU 约 3–4 分钟。
+
+输出：`mesh.obj`，97k–200k 三角面，带顶点色，无 UV、无贴图。
 
 ### 7.4 减面结果（用 `Tools/3D/decimate_to_budget.py`）
 
