@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 /// <summary>
 /// 场景里已有的 Text 统一换成中文动态字体（WebGL/小游戏必需）。
-/// 运行时新建/实例化的 Text（商店、提示面板等）在前 10 秒内也会被反复补上。
+/// 商店、设置等面板是运行时才实例化的，所以持续低频扫描，新面板打开后也能补上。
 /// </summary>
 public class ChineseFontFixer : MonoBehaviour
 {
@@ -24,22 +24,12 @@ public class ChineseFontFixer : MonoBehaviour
     IEnumerator ApplyLoop()
     {
         Font font = UIFont.Get();
+        Debug.Log("[UIFont] 使用字体：" + font.name);
 
-        float until = Time.unscaledTime + 10f;
-        while (Time.unscaledTime < until)
+        while (true)
         {
-            Apply(font);
-            yield return new WaitForSecondsRealtime(0.5f);
-        }
-
-        Debug.Log("[UIFont] 已应用到所有 Text：" + font.name);
-    }
-
-    static void Apply(Font font)
-    {
-        foreach (Text text in FindObjectsOfType<Text>(true))
-        {
-            if (text.font != font) text.font = font;
+            UIFont.ApplyAll();
+            yield return new WaitForSecondsRealtime(1f);
         }
     }
 }

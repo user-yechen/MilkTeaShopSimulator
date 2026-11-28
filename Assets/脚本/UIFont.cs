@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// 运行时 UI 字体：优先用 Resources/Fonts/NotoSansSC（中文），找不到才退回内置 LegacyRuntime。
@@ -19,5 +20,13 @@ public static class UIFont
             cached = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         }
         return cached;
+    }
+
+    /// <summary>把当前场景（含未激活）所有 Text 换成中文字体；面板打开后调用一次即可</summary>
+    public static void ApplyAll()
+    {
+        Font font = Get();
+        foreach (Text text in Object.FindObjectsOfType<Text>(true))
+            if (text.font != font) text.font = font;
     }
 }

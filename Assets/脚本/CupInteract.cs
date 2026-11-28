@@ -300,6 +300,7 @@ public class CupInteract : MonoBehaviour
         // 关闭由面板自身的 PanelCloseButton 处理（挂在 顶栏/关闭按钮 上）
 
         machinePanel.SetActive(true);
+        UIFont.ApplyAll();
     }
 
     public void OnGetMediumFromMachine() { PickUpFromMachine(Cup.CupType.Medium); }

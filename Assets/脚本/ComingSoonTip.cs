@@ -155,6 +155,7 @@ public class ComingSoonTip : MonoBehaviour
         settingsPanelInstance = Instantiate(prefab, parent);
         settingsPanelInstance.name = prefab.name;
         settingsPanelInstance.SetActive(true);
+        UIFont.ApplyAll();
 
         EnsureSettingsButtons(settingsPanelInstance);
     }
@@ -209,6 +210,7 @@ public class ComingSoonTip : MonoBehaviour
         }
 
         shopPanelInstance.SetActive(true);
+        UIFont.ApplyAll();
     }
 
     /// <summary>给商店界面里名字含「关闭」的 Button 补 PanelCloseButton（幂等，已有则跳过）</summary>
