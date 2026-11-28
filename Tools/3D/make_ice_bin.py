@@ -29,13 +29,13 @@ OUT = arg("--out", "ice_bin.png")
 GLB = arg("--glb", None)
 SIZE = int(arg("--size", "1024"))
 
-BIN_X, BIN_Y, BIN_Z = 2.82, 4.32, 0.398
+BIN_X, BIN_Y, BIN_Z = 2.718, 3.339, 0.868
 MARGIN = 0.98
 
 CONF = {
-    "low":  {"count": 18,  "fill": 0.22, "size": (0.34, 0.46), "seed": 101},
-    "mid":  {"count": 55,  "fill": 0.55, "size": (0.34, 0.46), "seed": 202},
-    "high": {"count": 110, "fill": 0.95, "size": (0.32, 0.44), "seed": 303},
+    "low":  {"count": 20,  "fill": 0.22, "size": (0.34, 0.46), "seed": 101},
+    "mid":  {"count": 70,  "fill": 0.50, "size": (0.34, 0.46), "seed": 202},
+    "high": {"count": 150, "fill": 0.85, "size": (0.32, 0.44), "seed": 303},
 }
 cfg = CONF[LEVEL]
 random.seed(cfg["seed"])
