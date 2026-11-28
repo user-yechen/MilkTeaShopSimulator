@@ -45,6 +45,8 @@ public class ShopManager : MonoBehaviour
     RectTransform panel;      // 营业结束面板
     Text resultText;          // 营收文字
     Button restartButton;     // “再玩一次”按钮
+    Button doubleButton;      // “看广告双倍领取”按钮
+    bool doubledToday;        // 今天是否已经领过双倍
     Text revenueText;         // 场景中“营收额”的数值 Text
     Text walletText;          // 场景中“钱包”一栏的 Text
     int shownRevenue = -1;    // 已显示的营业额，用于避免每帧重复写文字
@@ -91,6 +93,7 @@ public class ShopManager : MonoBehaviour
     void EndDay()
     {
         DayEnded = true;
+        doubledToday = false;
         GameClock clock = GameClock.Instance;
         if (clock != null)
         {
@@ -99,16 +102,45 @@ public class ShopManager : MonoBehaviour
         }
         RefreshStatLabels();
         EnsureUI();
-        int wallet = clock != null ? clock.Wallet : 0;
-        resultText.text = "今日营业结束\n今日营收：" + Revenue + " 元\n钱包：" + wallet + " 元";
+        UpdateEndText();
+        if (doubleButton != null) doubleButton.gameObject.SetActive(true);
         panel.SetAsLastSibling();   // 盖住其他运行时创建的 UI
         panel.gameObject.SetActive(true);
+    }
+
+    void UpdateEndText()
+    {
+        if (resultText == null) return;
+        GameClock clock = GameClock.Instance;
+        int wallet = clock != null ? clock.Wallet : 0;
+        resultText.text = "今日营业结束\n今日营收：" + Revenue + " 元\n钱包：" + wallet + " 元";
+    }
+
+    /// <summary>打烊面板：看激励视频，把今天的营收再领一遍（双倍）</summary>
+    public void OnDoubleRevenue()
+    {
+        if (!DayEnded || doubledToday) return;
+
+        AdService.Instance.ShowRewarded("day_end_double", ok =>
+        {
+            if (!ok || doubledToday) return;
+            doubledToday = true;
+
+            GameClock clock = GameClock.Instance;
+            if (clock != null) clock.AddToWallet(Revenue);   // 再发一遍 = 双倍
+
+            RefreshStatLabels();
+            UpdateEndText();
+            if (doubleButton != null) doubleButton.gameObject.SetActive(false);
+        });
     }
 
     /// <summary>“再玩一次”：重开一天（营收额每天从 0 开始计数）</summary>
     public void RestartDay()
     {
         Revenue = 0;
+        doubledToday = false;
+        if (doubleButton != null) doubleButton.gameObject.SetActive(false);
         RefreshStatLabels();
         DayEnded = false;
         if (panel != null) panel.gameObject.SetActive(false);
@@ -225,12 +257,17 @@ public class ShopManager : MonoBehaviour
         panel.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.78f);
 
         resultText = CreateText(panel, "营业结束文字", 42,
-            new Vector2(0.08f, 0.42f), new Vector2(0.92f, 0.82f));
+            new Vector2(0.08f, 0.50f), new Vector2(0.92f, 0.86f));
+
+        doubleButton = CreateButton(panel, "看广告双倍领取",
+            new Vector2(0.5f, 0.34f), new Vector2(300f, 84f), 28);
+        doubleButton.onClick.AddListener(OnDoubleRevenue);
 
         restartButton = CreateButton(panel, "再玩一次",
-            new Vector2(0.5f, 0.25f), new Vector2(240f, 84f), 30);
+            new Vector2(0.5f, 0.20f), new Vector2(240f, 84f), 30);
         restartButton.onClick.AddListener(RestartDay);
 
+        doubleButton.gameObject.SetActive(false);
         panelGo.SetActive(false);
     }
 
