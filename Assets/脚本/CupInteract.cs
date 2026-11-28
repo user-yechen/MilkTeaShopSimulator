@@ -172,7 +172,7 @@ public class CupInteract : MonoBehaviour
         bool trayOpen   = iceTray != null && iceTray.State == IceTray.IceTrayState.Open;
         iceOpenButton   .gameObject.SetActive(nearIce && trayClosed);
         iceCloseButton  .gameObject.SetActive(nearIce && trayOpen);
-        iceTakeIceButton.gameObject.SetActive(nearIce && trayOpen && iceTray.iceCount > 0
+        iceTakeIceButton.gameObject.SetActive(nearIce && trayOpen && iceTray.HasIce
             && heldCup != null && heldCup.isContained);
     }
 

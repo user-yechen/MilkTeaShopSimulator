@@ -10,8 +10,33 @@ public class IceTray : MonoBehaviour
 {
     [Header("取冰设置")]
     public Cup.Temperature iceTemperature = Cup.Temperature.NormalIce;
-    public int iceCapacity = 8;
-    public int iceCount = 8;
+    [Tooltip("最大储量（克）")]
+    public int maxIceGrams = 6000;
+    [Tooltip("每取一次消耗（克）")]
+    public int icePerTake = 200;
+    [Tooltip("当前剩余（克），运行时从满仓开始")]
+    public int currentIceGrams = 6000;
+
+    /// <summary>是否还有冰</summary>
+    public bool HasIce => currentIceGrams > 0;
+
+    /// <summary>
+    /// 储量阶段：0=空，1=少（1~1000），2=中（1001~3000），3=多（3001~6000）。
+    /// 视觉/动画可订阅 OnIceChanged 后按此切换。
+    /// </summary>
+    public int IceStage
+    {
+        get
+        {
+            if (currentIceGrams <= 0) return 0;
+            if (currentIceGrams <= 1000) return 1;
+            if (currentIceGrams <= 3000) return 2;
+            return 3;
+        }
+    }
+
+    /// <summary>冰量变化（参数=当前克数）</summary>
+    public event System.Action<int> OnIceChanged;
 
     [Header("解锁条件（物件等级）")]
     [Tooltip("等级来源（如前制作台上的 MachineLevel）；留空自动取自身/父级上的。找不到 MachineLevel 视为始终解锁")]
@@ -69,15 +94,25 @@ public class IceTray : MonoBehaviour
 
     public void OnClickTakeIce()
     {
+        if (!IsUnlocked) return;
         if (State != IceTrayState.Open) return;
-        if (iceCount <= 0) return;
+        if (!HasIce) return;
 
         CupInteract interact = FindObjectOfType<CupInteract>();
         if (interact != null && interact.HeldCup != null && interact.HeldCup.isContained)
         {
             interact.HeldCup.SetTemperature(iceTemperature);
-            iceCount--;
+            currentIceGrams = Mathf.Max(0, currentIceGrams - icePerTake);
+            OnIceChanged?.Invoke(currentIceGrams);
+            ComingSoonTip.Show($"剩余冰块 {currentIceGrams} g");
         }
+    }
+
+    /// <summary>补冰 / 消耗（克），供进货或调试调用</summary>
+    public void AddIce(int grams)
+    {
+        currentIceGrams = Mathf.Clamp(currentIceGrams + grams, 0, maxIceGrams);
+        OnIceChanged?.Invoke(currentIceGrams);
     }
 
     // ===== 动画协程 =====
@@ -119,6 +154,7 @@ public class IceTray : MonoBehaviour
     [ContextMenu("重置冰量")]
     void ResetIce()
     {
-        iceCount = iceCapacity;
+        currentIceGrams = maxIceGrams;
+        OnIceChanged?.Invoke(currentIceGrams);
     }
 }
