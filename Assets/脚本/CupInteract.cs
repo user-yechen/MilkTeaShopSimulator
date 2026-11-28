@@ -19,6 +19,8 @@ public class CupInteract : MonoBehaviour
     public string iceOpenButtonName  = "打开冰格按钮";
     public string iceCloseButtonName = "关闭冰格按钮";
     public string iceTakeIceButtonName = "取冰按钮";
+    [Tooltip("前台有未接待顾客时出现的按钮")]
+    public string receptionButtonName = "接待按钮";
 
     [Header("距离设置")]
     public float interactDistance = 3f;
@@ -42,6 +44,7 @@ public class CupInteract : MonoBehaviour
     public Button iceOpenButton;
     public Button iceCloseButton;
     public Button iceTakeIceButton;
+    public Button receptionButton;
 
     [Header("滚动视图")]
     public Vector2 scrollViewAnchor = new Vector2(0.65f, 0.5f);
@@ -165,6 +168,8 @@ public class CupInteract : MonoBehaviour
         // —— 前台 ——
         bool nearCounter = counterDisplay != null && counterDisplay.IsNear(playerPos, interactDistance);
         counterPlaceButton.gameObject.SetActive(nearCounter && heldCup != null && heldCup.isContained);
+        receptionButton.gameObject.SetActive(nearCounter && CustomerSpawner.Instance != null
+            && CustomerSpawner.Instance.FrontReady);
 
         // —— 冰格（前制作台，等级不够不开放） ——
         bool nearIce = iceTray != null && iceTray.IsUnlocked && iceTray.IsNear(playerPos, interactDistance);
@@ -390,6 +395,7 @@ public class CupInteract : MonoBehaviour
         TakeOverSceneButton(ref iceOpenButton,    iceOpenButtonName);
         TakeOverSceneButton(ref iceCloseButton,   iceCloseButtonName);
         TakeOverSceneButton(ref iceTakeIceButton, iceTakeIceButtonName);
+        TakeOverSceneButton(ref receptionButton,  receptionButtonName);
 
         if (mediumButton       == null) mediumButton        = CreateButton(content, "获取中杯");
         if (largeButton        == null) largeButton         = CreateButton(content, "获取大杯");
@@ -404,6 +410,7 @@ public class CupInteract : MonoBehaviour
         if (iceOpenButton      == null) iceOpenButton       = CreateButton(content, "打开冰格");
         if (iceCloseButton     == null) iceCloseButton      = CreateButton(content, "关闭冰格");
         if (iceTakeIceButton   == null) iceTakeIceButton    = CreateButton(content, "取冰");
+        if (receptionButton    == null) receptionButton     = CreateButton(content, "接待");
 
         AddButtonToScroll(mediumButton);
         AddButtonToScroll(largeButton);
@@ -418,6 +425,7 @@ public class CupInteract : MonoBehaviour
         AddButtonToScroll(iceOpenButton);
         AddButtonToScroll(iceCloseButton);
         AddButtonToScroll(iceTakeIceButton);
+        AddButtonToScroll(receptionButton);
 
         mediumButton       .onClick.AddListener(OnGetMedium);
         largeButton        .onClick.AddListener(OnGetLarge);
@@ -432,6 +440,7 @@ public class CupInteract : MonoBehaviour
         iceOpenButton      .onClick.AddListener(() => { if (iceTray != null) iceTray.OnClickOpen(); });
         iceCloseButton     .onClick.AddListener(() => { if (iceTray != null) iceTray.OnClickClose(); });
         iceTakeIceButton   .onClick.AddListener(() => { if (iceTray != null) iceTray.OnClickTakeIce(); });
+        receptionButton    .onClick.AddListener(() => { if (CustomerSpawner.Instance != null) CustomerSpawner.Instance.ReceiveFront(); });
 
         mediumButton       .gameObject.SetActive(false);
         largeButton        .gameObject.SetActive(false);
@@ -446,6 +455,7 @@ public class CupInteract : MonoBehaviour
         iceOpenButton      .gameObject.SetActive(false);
         iceCloseButton     .gameObject.SetActive(false);
         iceTakeIceButton   .gameObject.SetActive(false);
+        receptionButton    .gameObject.SetActive(false);
     }
 
     /// <summary>查找按钮子物体上的 Text 组件并设置文字；找不到就跳过</summary>

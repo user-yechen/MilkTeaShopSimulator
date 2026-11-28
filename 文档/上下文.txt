@@ -104,6 +104,8 @@
   素材给对应 Agent 学习，归纳写回各目录 归纳.md，媒体文件不入 git
 - 2026-11-27 训练成果：新建 训练成果/图像/{设备,UI,图标}；接入本地 ComfyUI（8188），
   Tools/ComfyUI/generate.py 支持文生图与图生图；已出加热机概念图 3 版
+- 2026-11-28 顾客：CustomerSpawner（1–5 人/1–20s，总量 10、队列 8）+ CustomerAgent
+  （排队 -X、间距 1m、取餐点队首+(0,0,-3)）；CupInteract 加「接待」按钮
 - 2026-11-28 冰块储备：IceTray 改克数（6000g，每次取 200g，四阶段 0/少/中/多），取冰提示剩余；
   仅 2 级及以上可取（unlockLevel 已生效）；BGM：渲染 day/night WAV + BgmController 按时段切换
 - 2026-11-28 前制作台：新 prefab 只含 lv1/lv2/lv3 嵌套外观，缺 MachineLevel/IceTray；

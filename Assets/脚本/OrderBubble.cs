@@ -62,7 +62,7 @@ public class OrderBubble : MonoBehaviour
         walker = GetComponent<PasserbyWalk>();
         if (walker != null)
         {
-            walker.OnArrivedAtCounter += ShowSequentially;
+            walker.OnArrivedAtCounter += ShowOrder;
             walker.OnLeft += Hide;
         }
     }
@@ -71,7 +71,8 @@ public class OrderBubble : MonoBehaviour
     void Update()
     {
         if (bubble == null) return;
-        if (walker == null || !walker.IsOrdering)
+        if (walker == null) return;          // 新顾客（CustomerAgent）由自己控制显隐
+        if (!walker.IsOrdering)
         {
             if (showing || bubble.enabled) Hide();
         }
@@ -82,7 +83,7 @@ public class OrderBubble : MonoBehaviour
         PasserbyWalk walker = GetComponent<PasserbyWalk>();
         if (walker != null)
         {
-            walker.OnArrivedAtCounter -= ShowSequentially;
+            walker.OnArrivedAtCounter -= ShowOrder;
             walker.OnLeft -= Hide;
         }
     }
@@ -151,11 +152,17 @@ public class OrderBubble : MonoBehaviour
     }
 
     /// <summary>路人走到前台停下：显示气泡，图标按槽位顺序逐个出现（每个间隔 iconInterval 秒）</summary>
-    void ShowSequentially()
+    public void ShowOrder()
     {
         showing = true;
         if (revealRoutine != null) StopCoroutine(revealRoutine);
         revealRoutine = StartCoroutine(RevealRoutine());
+    }
+
+    /// <summary>顾客离开 / 点餐结束：隐藏气泡</summary>
+    public void HideOrder()
+    {
+        Hide();
     }
 
     IEnumerator RevealRoutine()
