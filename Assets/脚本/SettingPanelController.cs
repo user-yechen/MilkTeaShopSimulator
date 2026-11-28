@@ -33,7 +33,14 @@ public class SettingPanelController : MonoBehaviour
             Debug.LogWarning("[SettingPanelController] 没找到关闭按钮（名字含「" + closeBtnKeyword + "」）");
 
         if (quitButton != null)
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            // 浏览器 / 小游戏里 Application.Quit 无效，点了会卡住；直接隐藏退出按钮
+            quitButton.gameObject.SetActive(false);
+#else
             quitButton.onClick.AddListener(QuitGame);
+#endif
+        }
         else
             Debug.LogWarning("[SettingPanelController] 没找到退出游戏按钮（名字含「" + quitBtnKeyword + "」）");
     }
@@ -49,6 +56,9 @@ public class SettingPanelController : MonoBehaviour
     {
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
+#elif UNITY_WEBGL
+        // 浏览器 / 小游戏无法主动退出：关掉设置面板即可，避免 QuitCleanup 卡死
+        ClosePanel();
 #else
         Application.Quit();
 #endif
