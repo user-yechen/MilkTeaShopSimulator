@@ -585,7 +585,7 @@ public class CupInteract : MonoBehaviour
         trt.offsetMin = trt.offsetMax = Vector2.zero;
 
         Text text = textGo.GetComponent<Text>();
-        text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        text.font = UIFont.Get();
         text.fontSize = 12;
         text.alignment = TextAnchor.MiddleCenter;
         text.color = Color.black;

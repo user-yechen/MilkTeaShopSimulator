@@ -56,7 +56,7 @@ public static class ShopPurchaseDialog
             Debug.LogWarning("[ShopPurchaseDialog] 场景里没有 Canvas");
             return;
         }
-        Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        Font font = UIFont.Get();
 
         // 全屏遮罩（拦截点击，模态）
         overlay = new GameObject("购买确认弹窗", typeof(RectTransform), typeof(Image));

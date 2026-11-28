@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: MiniGameConfig
   m_EditorClassIdentifier: 
   ProjectConf:
-    Appid: 
+    Appid: 6b0ab8ccfb6fc0c6981bb771
     CDN: 
     assetLoadType: 1
     compressDataPackage: 0
     VideoUrl: 
-    DST: 
+    DST: D:/UnityProject
     StreamCDN: 
     bundleHashLength: 32
     bundlePathIdentifier: StreamingAssets;
@@ -27,7 +27,7 @@ MonoBehaviour:
     MemorySize: 256
     HideAfterCallMain: 1
     preloadFiles: 
-    Orientation: 0
+    Orientation: 1
     bgImageSrc: Assets/TJ-WASM-SDK-V2/Runtime/minigame-default/images/background.jpg
     isCoverviewCustomized: 0
     dataFileSubPrefix: 
@@ -57,7 +57,7 @@ MonoBehaviour:
     ScriptOnly: 0
     Il2CppOptimizeSize: 1
     profilingFuncs: 1
-    Webgl2: 0
+    Webgl2: 1
     fbslim: 0
     DeleteStreamingAssets: 1
     ProfilingMemory: 0

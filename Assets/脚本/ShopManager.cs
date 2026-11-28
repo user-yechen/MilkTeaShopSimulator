@@ -282,7 +282,7 @@ public class ShopManager : MonoBehaviour
         rt.offsetMax = Vector2.zero;
 
         Text text = go.GetComponent<Text>();
-        text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        text.font = UIFont.Get();
         text.fontSize = fontSize;
         text.alignment = TextAnchor.MiddleCenter;
         text.color = Color.white;

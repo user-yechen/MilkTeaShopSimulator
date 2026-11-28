@@ -53,7 +53,7 @@ public static class JoystickPositionAdjuster
             return;
         }
 
-        Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        Font font = UIFont.Get();
 
         // 根（全屏但不加 Graphic → 不挡摇杆的射线检测）
         adjustUI = new GameObject("摇杆位置调整UI", typeof(RectTransform));
