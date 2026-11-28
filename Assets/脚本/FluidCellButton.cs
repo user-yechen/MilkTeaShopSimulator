@@ -44,5 +44,10 @@ public class FluidCellButton : MonoBehaviour
         }
 
         machine.PourColored(fluidColor, fluidName, tintCup, forceOpaque);
+
+        // 选完液体直接关闭奶茶机交互界面
+        Transform panel = transform;
+        while (panel != null && !panel.name.Contains("奶茶机交互界面")) panel = panel.parent;
+        if (panel != null) panel.gameObject.SetActive(false);
     }
 }

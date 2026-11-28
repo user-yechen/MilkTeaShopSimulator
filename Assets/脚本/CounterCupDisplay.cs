@@ -148,9 +148,15 @@ public class CounterCupDisplay : MonoBehaviour
         cupObj.localScale = Vector3.one;
         cupObj.localRotation = Quaternion.identity;
 
-        // 展示杯只保留外观，不需要属性组件与碰撞
+        // 展示杯只保留外观，不需要属性组件与碰撞；但订单信息要抄一份给顾客匹配
         Cup displayCup = cupObj.GetComponent<Cup>();
-        if (displayCup != null) Destroy(displayCup);
+        if (displayCup != null)
+        {
+            var info = cupObj.gameObject.AddComponent<CounterCupInfo>();
+            info.cupType = displayCup.cupType;
+            info.teaType = displayCup.teaType;
+            Destroy(displayCup);
+        }
         foreach (Collider c in cupObj.GetComponentsInChildren<Collider>())
             Destroy(c);
 
@@ -200,9 +206,23 @@ public class CounterCupDisplay : MonoBehaviour
         foreach (Transform t in cups)
         {
             Cup cup = t.GetComponentInChildren<Cup>();
-            if (cup == null) continue;
-            if (cup.cupType != type) continue;
-            if (!string.IsNullOrEmpty(teaType) && cup.teaType != teaType) continue;
+            Cup.CupType ct;
+            string tea;
+            if (cup != null)
+            {
+                ct = cup.cupType;
+                tea = cup.teaType;
+            }
+            else
+            {
+                var info = t.GetComponentInChildren<CounterCupInfo>();
+                if (info == null) continue;
+                ct = info.cupType;
+                tea = info.teaType;
+            }
+
+            if (ct != type) continue;
+            if (!string.IsNullOrEmpty(teaType) && tea != teaType) continue;
             return t;
         }
         return null;

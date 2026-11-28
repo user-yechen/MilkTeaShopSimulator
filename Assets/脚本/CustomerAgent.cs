@@ -89,10 +89,18 @@ public class CustomerAgent : MonoBehaviour
             case S.ToPickup:
                 if (MoveTo(target))
                 {
-                    spawner.TakeFor(this);
-                    State = S.Leaving;
-                    path.Clear();
-                    path.AddRange(spawner.ExitPath());
+                    if (spawner.TakeFor(this))
+                    {
+                        State = S.Leaving;
+                        path.Clear();
+                        path.AddRange(spawner.ExitPath());
+                    }
+                    else
+                    {
+                        // 没取到（杯型/液体不匹配或已被拿），回去等下一轮
+                        State = S.Wander;
+                        target = spawner.RandomWanderPoint();
+                    }
                 }
                 break;
 

@@ -175,12 +175,14 @@ public class CustomerSpawner : MonoBehaviour
     public bool HasDrinkFor(CustomerAgent agent) =>
         Counter != null && Counter.HasCup(agent.OrderCupType, agent.OrderFluid);
 
-    /// <summary>取走该顾客的饮品并结算，移出取餐队列</summary>
-    public void TakeFor(CustomerAgent agent)
+    /// <summary>取走该顾客的饮品并结算，移出取餐队列；取不到返回 false（调用方应重试）</summary>
+    public bool TakeFor(CustomerAgent agent)
     {
-        if (Counter != null) Counter.TakeCup(agent.OrderCupType, agent.OrderFluid);
+        if (Counter == null) return false;
+        if (!Counter.TakeCup(agent.OrderCupType, agent.OrderFluid)) return false;
         if (ShopManager.Instance != null) ShopManager.Instance.CompleteOrder();
         pickupQueue.Remove(agent);
+        return true;
     }
 
     /// <summary>离开点：刷新点（入口范围）</summary>
