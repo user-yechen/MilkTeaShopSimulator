@@ -20,6 +20,7 @@ public class CustomerAgent : MonoBehaviour
     int slot = -1;
     Vector3 target;
     float timer;
+    readonly System.Collections.Generic.List<Vector3> path = new System.Collections.Generic.List<Vector3>();
 
     public void Init(CustomerSpawner sp, Vector3 start)
     {
@@ -29,6 +30,8 @@ public class CustomerAgent : MonoBehaviour
         modelYawOffset = sp.modelYawOffset;
         order = GetComponent<OrderBubble>();
         if (order == null) order = gameObject.AddComponent<OrderBubble>();
+        path.Clear();
+        path.AddRange(sp.EntryPath());
     }
 
     /// <summary>分配队列槽位（0=队首）</summary>
@@ -53,6 +56,7 @@ public class CustomerAgent : MonoBehaviour
         switch (State)
         {
             case S.ToQueue:
+                if (path.Count > 0) { FollowPath(); break; }
                 if (MoveTo(target)) { State = S.Waiting; FaceDirection(spawner.queueFaceDir); }
                 break;
 
@@ -66,17 +70,16 @@ public class CustomerAgent : MonoBehaviour
                 if (timer <= 0f)
                 {
                     if (order != null) order.HideOrder();
-                    spawner.OnOrdered(this);
+                    spawner.OnOrdered(this);          // 进入取餐队列（先来后到）
                     State = S.Wander;
-                    timer = Random.Range(2f, 4f);
                     target = spawner.RandomWanderPoint();
                 }
                 break;
 
             case S.Wander:
+                // 排队期间在旁边晃；轮到自己且前台有对应饮品就去取
                 if (MoveTo(target)) target = spawner.RandomWanderPoint();
-                timer -= Time.deltaTime;
-                if (timer <= 0f && spawner.CounterHas(OrderCupType, OrderFluid))
+                if (spawner.IsPickupTurn(this) && spawner.HasDrinkFor(this))
                 {
                     State = S.ToPickup;
                     target = spawner.PickupPoint();
@@ -86,22 +89,31 @@ public class CustomerAgent : MonoBehaviour
             case S.ToPickup:
                 if (MoveTo(target))
                 {
-                    spawner.TakeCup(OrderCupType, OrderFluid);
+                    spawner.TakeFor(this);
                     State = S.Leaving;
-                    target = spawner.exitPoint;
+                    path.Clear();
+                    path.AddRange(spawner.ExitPath());
                 }
                 break;
 
             case S.Leaving:
-                if (MoveTo(target)) spawner.Despawn(this);
+                if (path.Count > 0) FollowPath();
+                else spawner.Despawn(this);
                 break;
         }
     }
 
-    Cup.CupType OrderCupType =>
+    bool FollowPath()
+    {
+        if (path.Count == 0) return true;
+        if (MoveTo(path[0], 0.15f)) path.RemoveAt(0);
+        return path.Count == 0;
+    }
+
+    public Cup.CupType OrderCupType =>
         order != null && order.CupType == "大杯" ? Cup.CupType.Large : Cup.CupType.Medium;
 
-    string OrderFluid => order != null ? order.FluidName : "牛奶";
+    public string OrderFluid => order != null ? order.FluidName : "牛奶";
 
     bool MoveTo(Vector3 destination, float stopDistance = 0.08f)
     {

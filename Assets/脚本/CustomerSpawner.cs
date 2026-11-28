@@ -51,6 +51,7 @@ public class CustomerSpawner : MonoBehaviour
 
     readonly List<CustomerAgent> alive = new List<CustomerAgent>();
     readonly List<CustomerAgent> waiting = new List<CustomerAgent>();
+    readonly List<CustomerAgent> pickupQueue = new List<CustomerAgent>();
 
     public int AliveCount => alive.Count;
     public int WaitingCount => waiting.Count;
@@ -153,6 +154,7 @@ public class CustomerSpawner : MonoBehaviour
     public void OnOrdered(CustomerAgent agent)
     {
         waiting.Remove(agent);
+        if (!pickupQueue.Contains(agent)) pickupQueue.Add(agent);   // 先来后到
         Reslot();
     }
 
@@ -160,9 +162,47 @@ public class CustomerSpawner : MonoBehaviour
     {
         alive.Remove(agent);
         waiting.Remove(agent);
+        pickupQueue.Remove(agent);
         Reslot();
         Destroy(agent.gameObject);
     }
+
+    /// <summary>是否轮到该顾客取餐（取餐队列先来后到）</summary>
+    public bool IsPickupTurn(CustomerAgent agent) =>
+        pickupQueue.Count > 0 && pickupQueue[0] == agent;
+
+    /// <summary>前台是否有该顾客要的饮品</summary>
+    public bool HasDrinkFor(CustomerAgent agent) =>
+        Counter != null && Counter.HasCup(agent.OrderCupType, agent.OrderFluid);
+
+    /// <summary>取走该顾客的饮品并结算，移出取餐队列</summary>
+    public void TakeFor(CustomerAgent agent)
+    {
+        if (Counter != null) Counter.TakeCup(agent.OrderCupType, agent.OrderFluid);
+        if (ShopManager.Instance != null) ShopManager.Instance.CompleteOrder();
+        pickupQueue.Remove(agent);
+    }
+
+    /// <summary>离开点：刷新点（入口范围）</summary>
+    public Vector3 ExitPoint() =>
+        new Vector3(Random.Range(enterMinX, enterMaxX), groundY, enterZ);
+
+    /// <summary>进店绕行点（避免穿墙）</summary>
+    public Vector3[] EntryPath() => new[]
+    {
+        new Vector3(-17.5f, groundY, 2.5f),
+        new Vector3(-17.5f, groundY, -7f),
+        new Vector3(-14f, groundY, -11f),
+    };
+
+    /// <summary>离店绕行点（回到刷新点）</summary>
+    public Vector3[] ExitPath() => new[]
+    {
+        new Vector3(-14f, groundY, -11f),
+        new Vector3(-17.5f, groundY, -7f),
+        new Vector3(-17.5f, groundY, 2.5f),
+        ExitPoint(),
+    };
 
     public Vector3 QueuePosition(int index) =>
         queueFront + queueDir.normalized * (Mathf.Clamp(index, 0, maxQueue - 1) * queueSpacing);
