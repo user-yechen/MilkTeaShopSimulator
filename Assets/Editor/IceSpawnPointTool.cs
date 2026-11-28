@@ -4,14 +4,15 @@ using UnityEditor;
 namespace MilkTea.EditorTools
 {
     /// <summary>
-    /// 在选中的冰槽容器（如前制作台lv2/Cube.001）下创建「冰块生成点」空物体，
-    /// 位置放在容器内底中心，并挂上 IceStockVisual。
+    /// 在选中的冰槽容器（如前制作台lv2/Cube.001）下创建一个空物体「冰块生成点」，
+    /// 位置放在容器内底中心。只负责定位置，不挂任何脚本、不生成冰块。
     /// </summary>
-    public static class IceStockAnchorTool
+    public static class IceSpawnPointTool
     {
         [MenuItem("奶茶店/摆放/创建冰块生成点", false, 32)]
-        public static void CreateAnchor()
-        {            var sel = Selection.activeGameObject;
+        public static void CreatePoint()
+        {
+            var sel = Selection.activeGameObject;
             if (sel == null)
             {
                 EditorUtility.DisplayDialog("冰块生成点", "先在 Hierarchy 里选中冰槽容器（如 Cube.001）。", "好");
@@ -25,20 +26,15 @@ namespace MilkTea.EditorTools
             }
 
             var go = new GameObject("冰块生成点");
-            Undo.RegisterCreatedObjectUndo(go, "Create Ice Anchor");
+            Undo.RegisterCreatedObjectUndo(go, "Create Ice Spawn Point");
             go.transform.SetParent(sel.transform, false);
-            go.transform.position = new Vector3(b.center.x, b.min.y + 0.001f, b.center.z);
+            go.transform.position = new Vector3(b.center.x, b.min.y, b.center.z);
             go.transform.rotation = Quaternion.identity;
             go.transform.localScale = Vector3.one;
 
-            var comp = go.AddComponent<IceStockVisual>();
-            comp.container = sel.transform;
-            comp.autoFitToContainer = true;
-            comp.fill = 0.5f;
-
             Selection.activeGameObject = go;
             EditorGUIUtility.PingObject(go);
-            Debug.Log($"[冰块] 已在 {sel.name} 下创建生成点，容器尺寸 {b.size}");
+            Debug.Log($"[冰块] 生成点已创建于 {sel.name} 内底中心，容器尺寸 {b.size}");
         }
 
         static bool TryGetBounds(GameObject go, out Bounds bounds)
