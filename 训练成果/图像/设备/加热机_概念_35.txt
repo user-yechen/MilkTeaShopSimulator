@@ -1,0 +1,9 @@
+checkpoint: 角色动漫插画融合模型The WonderMix（Checkpoint大模型）网盘免费下载\theIWondermix_v7.safetensors
+prompt: low poly 3D game asset, milk tea shop steam boiler machine, two straight metal pipes hanging from the panel, pipe tips angled slightly toward the center, not connected to the body, black panel with buttons, recessed alcove, base tray flush with bottom, white background, isometric view
+negative: handle, handrail, bracket, U shape, steam, cup, text, logo, watermark, photo, warped
+size: 1024x1024
+steps: 30
+cfg: 6.0
+seed: 1550339244
+sampler: euler / normal
+comfyui: http://127.0.0.1:8188

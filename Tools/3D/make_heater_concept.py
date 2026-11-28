@@ -100,10 +100,10 @@ cube("screen", (0, -0.214, 0.462), (0.080, 0.006, 0.045), SCREEN,
 # 按键
 for i in range(5):
     x = -0.080 + i * 0.040
-    cyl("btn_%d" % i, (x, -0.214, 0.405), 0.0075, 0.007, DARK,
+    cyl("btn_%d" % i, (x, -0.230, 0.408), 0.009, 0.008, DARK,
         rot=(math.radians(80), 0, 0), verts=16)
 
-# 蒸汽杆：垂直下 → 向外折一次 → 保持方向垂下；杆端与接水盘留出垂直间距
+# 蒸汽杆：垂直下 → 向外折一次 → 垂下，末端略向中心收束；杆端与接水盘留出垂直间距
 for side, x in ((-1, -0.070), (1, 0.070)):
     cyl("handle_%d" % side, (x, -0.205, 0.372), 0.014, 0.034, RED,
         rot=(math.radians(80), 0, 0), verts=20)
@@ -111,10 +111,10 @@ for side, x in ((-1, -0.070), (1, 0.070)):
         rot=(0, 0, 0), verts=16)
     cyl("wand_elbow_%d" % side, (x, -0.220, 0.322), 0.012, 0.060, PIPE,
         rot=(math.radians(-45), 0, 0), verts=16)
-    cyl("wand_dn_%d" % side, (x, -0.240, 0.300), 0.012, 0.060, PIPE,
-        rot=(0, 0, 0), verts=16)
-    cyl("nozzle_%d" % side, (x, -0.240, 0.262), 0.006, 0.025, PIPE,
-        rot=(0, 0, 0), verts=12)
+    cyl("wand_dn_%d" % side, (x, -0.240, 0.295), 0.012, 0.090, PIPE,
+        rot=(0, math.radians(side * 15), 0), verts=16)
+    cyl("nozzle_%d" % side, (x - side * 0.012, -0.240, 0.252), 0.006, 0.025, PIPE,
+        rot=(0, math.radians(side * 15), 0), verts=12)
 
 # 接水盘：底面与机器底部平齐（z=0），上表面留出放杯高度
 cube("tray_base", (0, -0.135, 0.020), (0.28, 0.15, 0.040), TRAY, bevel=0.003)
