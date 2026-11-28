@@ -1084,6 +1084,7 @@ MonoBehaviour:
   iceOpenButtonName: "\u6253\u5F00\u51B0\u683C\u6309\u94AE"
   iceCloseButtonName: "\u5173\u95ED\u51B0\u683C\u6309\u94AE"
   iceTakeIceButtonName: "\u53D6\u51B0\u6309\u94AE"
+  receptionButtonName: "\u63A5\u5F85\u6309\u94AE"
   interactDistance: 3
   holdOffset: {x: 0.35, y: -0.25, z: 0.6}
   heldCupEuler: {x: 0, y: 0, z: 0}
@@ -1100,6 +1101,7 @@ MonoBehaviour:
   iceOpenButton: {fileID: 0}
   iceCloseButton: {fileID: 0}
   iceTakeIceButton: {fileID: 0}
+  receptionButton: {fileID: 0}
   scrollViewAnchor: {x: 0.65, y: 0.5}
   scrollViewSize: {x: 120, y: 260}
   scrollViewOffset: {x: 0, y: -100}
@@ -7305,6 +7307,11 @@ Light:
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
   m_ShadowAngle: 0
+--- !u!1 &2093969050 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2786671994934594357, guid: 8520324bc74becd4ba025c53bcfab0bb, type: 3}
+  m_PrefabInstance: {fileID: 5708278258039927076}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2094318124
 GameObject:
   m_ObjectHideFlags: 0
@@ -8275,6 +8282,9 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2786671994934594357, guid: 8520324bc74becd4ba025c53bcfab0bb, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5708278258039927082}
     - targetCorrespondingSourceObject: {fileID: 5994318912104667034, guid: 8520324bc74becd4ba025c53bcfab0bb, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5708278258039927079}
@@ -8302,10 +8312,32 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   iceTemperature: 3
-  iceCapacity: 8
-  iceCount: 8
+  maxIceGrams: 6000
+  icePerTake: 200
+  currentIceGrams: 6000
   unlockSource: {fileID: 0}
   unlockLevel: 2
+--- !u!65 &5708278258039927082
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2093969050}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 3.3978343, y: 4.2554765, z: 19.428545}
+  m_Center: {x: -0.12084055, y: 1.5424817, z: -0.017418332}
 --- !u!1001 &7301286938250838838
 PrefabInstance:
   m_ObjectHideFlags: 0
