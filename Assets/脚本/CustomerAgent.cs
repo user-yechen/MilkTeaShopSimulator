@@ -113,7 +113,8 @@ public class CustomerAgent : MonoBehaviour
     public Cup.CupType OrderCupType =>
         order != null && order.CupType == "大杯" ? Cup.CupType.Large : Cup.CupType.Medium;
 
-    public string OrderFluid => order != null ? order.FluidName : "牛奶";
+    public string OrderFluid =>
+        order != null && !string.IsNullOrEmpty(order.FluidName) ? order.FluidName : "牛奶";
 
     bool MoveTo(Vector3 destination, float stopDistance = 0.08f)
     {

@@ -48,6 +48,8 @@ public class OrderBubble : MonoBehaviour
 
     void Start()
     {
+        GenerateOrder();          // 先生成订单数据：气泡缺失时也能正常取餐
+
         bubble = FindBubble();
         if (bubble == null)
         {
@@ -55,7 +57,6 @@ public class OrderBubble : MonoBehaviour
             return;
         }
 
-        GenerateOrder();
         BuildIcons();
         SetVisible(false);   // 走到前台之前不显示
 
