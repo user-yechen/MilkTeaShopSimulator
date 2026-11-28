@@ -53,11 +53,12 @@ public class CustomerAgent : MonoBehaviour
         switch (State)
         {
             case S.ToQueue:
-                if (MoveTo(target)) { State = S.Waiting; FaceDirection(spawner.queueDir); }
+                if (MoveTo(target)) { State = S.Waiting; FaceDirection(spawner.queueFaceDir); }
                 break;
 
             case S.Waiting:
                 if (slot >= 0) MoveTo(spawner.QueuePosition(slot), 0.15f);
+                FaceDirection(spawner.queueFaceDir);   // 排队时始终面朝 +X（前台）
                 break;
 
             case S.Ordering:

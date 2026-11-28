@@ -27,6 +27,8 @@ public class CustomerSpawner : MonoBehaviour
     [Header("队列")]
     public Vector3 queueFront = new Vector3(-12f, 1.16f, -16f);
     public Vector3 queueDir = Vector3.left;
+    [Tooltip("排队时顾客面朝的方向（默认朝 +X 前台）")]
+    public Vector3 queueFaceDir = Vector3.right;
     public float queueSpacing = 1f;
     public Vector3 pickupOffset = new Vector3(0f, 0f, -3f);
 
@@ -36,7 +38,7 @@ public class CustomerSpawner : MonoBehaviour
     public int waveMin = 1;
     public int waveMax = 5;
     public int maxAlive = 10;
-    public int maxQueue = 8;
+    public int maxQueue = 5;
     [Range(0, 23)] public int firstHour = 9;
 
     [Header("行为")]
@@ -92,7 +94,7 @@ public class CustomerSpawner : MonoBehaviour
             if (ShopManager.Instance != null && !ShopManager.Instance.IsOpen) return false;
             if (GameClock.Instance != null && !GameClock.Instance.IsAtOrAfter(firstHour, 0)) return false;
             if (alive.Count >= maxAlive) return false;
-            if (waiting.Count > maxQueue) return false;
+            if (waiting.Count >= maxQueue) return false;
             return true;
         }
     }
@@ -163,7 +165,7 @@ public class CustomerSpawner : MonoBehaviour
     }
 
     public Vector3 QueuePosition(int index) =>
-        queueFront + queueDir.normalized * (index * queueSpacing);
+        queueFront + queueDir.normalized * (Mathf.Clamp(index, 0, maxQueue - 1) * queueSpacing);
 
     public Vector3 PickupPoint() => queueFront + pickupOffset;
 
