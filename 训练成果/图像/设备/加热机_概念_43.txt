@@ -1,0 +1,9 @@
+checkpoint: 角色动漫插画融合模型The WonderMix（Checkpoint大模型）网盘免费下载\theIWondermix_v7.safetensors
+prompt: straight stainless steel steam pipe continuing vertically downward, small nozzle at the tip, clean metal tube matching the machine, product render
+negative: handle, handrail, curve, bent inward, loop, bracket, funnel, wide tube, steam, text, watermark, blurry
+size: 1024x1024
+steps: 30
+cfg: 6.0
+seed: 1039704060
+sampler: euler / normal
+comfyui: http://127.0.0.1:8188

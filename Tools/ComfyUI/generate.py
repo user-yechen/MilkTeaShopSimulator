@@ -70,7 +70,15 @@ def build_workflow(args):
         "7": {"class_type": "SaveImage",
               "inputs": {"filename_prefix": args.prefix, "images": ["6", 0]}},
     }
-    if args.init_image:
+    if getattr(args, "mask", ""):
+        wf["10"] = {"class_type": "LoadImage", "inputs": {"image": args.init_image_name}}
+        wf["11"] = {"class_type": "LoadImageMask",
+                    "inputs": {"image": args.mask_name, "channel": "red"}}
+        wf["12"] = {"class_type": "VAEEncodeForInpaint",
+                    "inputs": {"pixels": ["10", 0], "vae": ["1", 2],
+                               "mask": ["11", 0], "grow_mask_by": 8}}
+        wf["5"]["inputs"]["latent_image"] = ["12", 0]
+    elif args.init_image:
         wf["10"] = {"class_type": "LoadImage", "inputs": {"image": args.init_image_name}}
         wf["11"] = {"class_type": "VAEEncode",
                     "inputs": {"pixels": ["10", 0], "vae": ["1", 2]}}
@@ -94,6 +102,7 @@ def main():
     ap.add_argument("--prefix", default="milktea")
     ap.add_argument("--timeout", type=int, default=600)
     ap.add_argument("--init-image", default="")
+    ap.add_argument("--mask", default="")
     ap.add_argument("--denoise", type=float, default=1.0)
     ap.add_argument("--list", action="store_true")
     args = ap.parse_args()
@@ -112,8 +121,11 @@ def main():
         args.seed = random.randint(0, 2 ** 31 - 1)
 
     args.init_image_name = ""
+    args.mask_name = ""
     if args.init_image:
         args.init_image_name = upload_image(args.init_image)
+    if args.mask:
+        args.mask_name = upload_image(args.mask)
         print("uploaded", args.init_image_name)
 
     client_id = str(uuid.uuid4())

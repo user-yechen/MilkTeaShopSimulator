@@ -1,0 +1,9 @@
+checkpoint: 角色动漫插画融合模型The WonderMix（Checkpoint大模型）网盘免费下载\theIWondermix_v7.safetensors
+prompt: two thin stainless steel steam pipes hanging down from the control panel, each pipe has two bends, third segment vertical, small nozzle at the tip, clean metal tube, matching the machine stainless steel, product render
+negative: handle, handrail, U-shaped pipe, loop, bracket, cone, funnel, pipe connected at both ends, steam, text, logo, watermark, blurry
+size: 1024x1024
+steps: 30
+cfg: 6.0
+seed: 411967112
+sampler: euler / normal
+comfyui: http://127.0.0.1:8188
