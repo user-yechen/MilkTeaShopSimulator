@@ -22,7 +22,9 @@ public class GameTimeData
 }
 
 /// <summary>
-/// 统一存档：天数 + 钱包 + 物件等级，以 JSON 写到 persistentDataPath/gameTime.json。
+/// 统一存档：天数 + 钱包 + 物件等级。
+/// Android / 编辑器：JSON 写到 persistentDataPath/gameTime.json；
+/// WebGL / 微信小游戏：写 PlayerPrefs（persistentDataPath 不可写），键名 gameTime.json。
 /// 钟点每次启动都从开业时间（startHour:startMinute）开始，不存档。
 /// 由 GameClock 调用：启动时 Load 恢复；运行中、切后台、退出、跨天时 Save。
 /// 物件等级由 MachineLevel / ShopItem 通过 GetMachineLevel / SetMachineLevel 读写。
@@ -32,7 +34,10 @@ public static class GameTimeStore
 {
     public const string FileName = "gameTime.json";
 
-    /// <summary>存档完整路径（Windows 一般在 %USERPROFILE%\AppData\LocalLow\&lt;公司&gt;\&lt;产品&gt;\gameTime.json）</summary>
+    /// <summary>WebGL / 小游戏下的 PlayerPrefs 键名</summary>
+    public const string PlayerPrefsKey = "gameTime.json";
+
+    /// <summary>存档完整路径（Android / 编辑器用；WebGL 走 PlayerPrefs）</summary>
     public static string SavePath => Path.Combine(Application.persistentDataPath, FileName);
 
     /// <summary>已知可购买/可升级物件：首次读档时预写入，默认 1 级（对应 MachineLevel.CanonicalIdFor 的规范 ID）</summary>
@@ -53,8 +58,14 @@ public static class GameTimeStore
         if (cached != null) return;
         try
         {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            string json = PlayerPrefs.GetString(PlayerPrefsKey, null);
+            if (!string.IsNullOrEmpty(json))
+                cached = JsonUtility.FromJson<GameTimeData>(json);
+#else
             if (File.Exists(SavePath))
                 cached = JsonUtility.FromJson<GameTimeData>(File.ReadAllText(SavePath));
+#endif
         }
         catch (Exception e)
         {
@@ -84,7 +95,12 @@ public static class GameTimeStore
     {
         try
         {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            PlayerPrefs.SetString(PlayerPrefsKey, JsonUtility.ToJson(cached));
+            PlayerPrefs.Save();
+#else
             File.WriteAllText(SavePath, JsonUtility.ToJson(cached));
+#endif
         }
         catch (Exception e)
         {
