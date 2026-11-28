@@ -104,6 +104,7 @@
   素材给对应 Agent 学习，归纳写回各目录 归纳.md，媒体文件不入 git
 - 2026-11-27 训练成果：新建 训练成果/图像/{设备,UI,图标}；接入本地 ComfyUI（8188），
   Tools/ComfyUI/generate.py 支持文生图与图生图；已出加热机概念图 3 版
+- 2026-11-28 构建：BuildScript 增加 WebGL 构建、minihost 环境检查/安装/打开构建窗口
 - 2026-11-28 发布：新增 文档/07-发布/团结小游戏宿主.md（minihost.tuanjie.cn 上传流程）
 - 2026-11-28 广告：IAdService + MockAdService；打烊面板「看广告双倍领取」（day_end_double）
 - 2026-11-28 变现：新增 文档/07-发布/广告变现方案.md（个人无版号走海外 Web/AdMob）
@@ -113,6 +114,7 @@
 - 2026-11-28 顾客：CustomerSpawner（1–5 人/1–20s，总量 10、队列 5）+ CustomerAgent
   排队面朝 +X；取餐先来后到（IsPickupTurn）；取完从刷新点离开（含绕行点）；
   前制作台按等级只显示 lv1/lv2/lv3 之一（AutoAttach）
+- 2026-11-28 构建：BuildScript 增加 WebGL 构建、minihost 环境检查/安装/打开构建窗口
 - 2026-11-28 发布：新增 文档/07-发布/团结小游戏宿主.md（minihost.tuanjie.cn 上传流程）
 - 2026-11-28 广告：IAdService + MockAdService；打烊面板「看广告双倍领取」（day_end_double）
 - 2026-11-28 变现：新增 文档/07-发布/广告变现方案.md（个人无版号走海外 Web/AdMob）
